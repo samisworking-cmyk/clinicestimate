@@ -272,19 +272,19 @@ input[type=number]{padding:6px 8px;border:0.5px solid var(--color-border-seconda
   <div class="section-title"><h3 style="margin:0">Cash-pay services</h3><span class="pill">self-pay / out-of-pocket</span></div>
   <div class="grid2">
     <div>
-      <div class="cash-item"><label>Femto laser (per eye)</label><input type="number" id="femto-price" value="800" min="0" oninput="upd()"><span style="font-size:11px;color:var(--color-text-tertiary);margin-left:6px">$ / eye</span></div>
+      <div class="cash-item"><label>Femto laser (per eye)</label><input type="number" id="femto-price after cost" value="1000" min="0" oninput="upd()"><span style="font-size:11px;color:var(--color-text-tertiary);margin-left:6px">$ / eye</span></div>
       <div class="cash-item"><label>Femto laser eyes per month</label><input type="number" id="femto-n" value="3" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>Vivity IOL (per eye)</label><input type="number" id="vivity-price" value="1200" min="0" oninput="upd()"></div>
+      <div class="cash-item" style="margin-top:8px"><label>Vivity IOL (per eye)</label><input type="number" id="vivity-price after cost" value="1800" min="0" oninput="upd()"></div>
       <div class="cash-item"><label>Vivity eyes per month</label><input type="number" id="vivity-n" value="2" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>PanOptix IOL (per eye)</label><input type="number" id="panoptix-price" value="1200" min="0" oninput="upd()"></div>
+      <div class="cash-item" style="margin-top:8px"><label>PanOptix IOL (per eye)</label><input type="number" id="panoptix-price after cost" value="1800" min="0" oninput="upd()"></div>
       <div class="cash-item"><label>PanOptix eyes per month</label><input type="number" id="panoptix-n" value="3" min="0" oninput="upd()"></div>
     </div>
     <div>
-      <div class="cash-item"><label>Prem. presbyopia IOL — EnVista/other (per eye)</label><input type="number" id="envy-price" value="1000" min="0" oninput="upd()"></div>
+      <div class="cash-item"><label>Prem. presbyopia IOL — EnVista/other (per eye)</label><input type="number" id="envy-price after cost" value="1800" min="0" oninput="upd()"></div>
       <div class="cash-item"><label>Presbyopia IOL eyes per month</label><input type="number" id="envy-n" value="1" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>Toric IOL upgrade (per eye)</label><input type="number" id="toric-price" value="750" min="0" oninput="upd()"></div>
+      <div class="cash-item" style="margin-top:8px"><label>Toric IOL upgrade (per eye)</label><input type="number" id="toric-price after cost" value="1000" min="0" oninput="upd()"></div>
       <div class="cash-item"><label>Toric eyes per month</label><input type="number" id="toric-n" value="2" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>LASIK/refractive consult fee</label><input type="number" id="lk-price" value="0" min="0" oninput="upd()"></div>
+      <div class="cash-item" style="margin-top:8px"><label>LASIK/refractive </label><input type="number" id="lk-price" value="0" min="0" oninput="upd()"></div>
       <div class="cash-item"><label>Refractive cases per month</label><input type="number" id="lk-n" value="0" min="0" oninput="upd()"></div>
     </div>
   </div>
@@ -363,10 +363,10 @@ input[type=number]{padding:6px 8px;border:0.5px solid var(--color-border-seconda
 
 <script>
 const MC_RATES = {
-  '99213': 78, '99214': 115, '92014': 175, '92004': 199, '92012': 92,
-  '92002': 143, '92133': 45, '92134': 47, '92083': 50, '68761': 183,
-  '65778': 557, '66984': 713, '66982': 919, '66991': 791,
-  '65820': 350, '66174': 539, '0449T': 420, '66821': 252,
+  '99213': 78, '99214': 115, '92014': 130, '92004': 162.45, '92012': 93.10,
+  '92002': 91.80, '92133': 45, '92134': 47, '92083': 50, '68761': 183,
+  '65778': 557, '66984': 463, '66982': 630, '66991': 582,
+  '65820': 723, '66174': 540, '0449T': 420, '66821': 252,
   '65855': 188, '66761': 195, '92136': 101, '92250': 25, '76514': 34,
   '92082': 30
 };
