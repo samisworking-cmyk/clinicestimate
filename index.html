@@ -1,98 +1,127 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ophthalmology Revenue Estimator</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary);background:transparent}
-h2{font-size:18px;font-weight:500;margin-bottom:1rem;color:var(--color-text-primary)}
-h3{font-size:15px;font-weight:500;margin-bottom:.75rem;color:var(--color-text-primary)}
-.section{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:12px;color:var(--color-text-secondary)}
-.field input[type=range]{width:100%}
-.val-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-text-secondary);margin-bottom:2px}
-.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
-.metric-card .label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
-.metric-card .value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
-.metric-card .sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
-.ins-bar{height:16px;border-radius:4px;display:flex;overflow:hidden;margin:8px 0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f4f4f0}
+.page{max-width:1120px;margin:0 auto;padding:1.5rem 1rem 4rem}
+h2{font-size:19px;font-weight:700;color:#111}
+h3{font-size:13px;font-weight:700;color:#111;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.04em}
+.card{background:#fff;border:1px solid #e0e0d8;border-radius:10px;padding:1.2rem;margin-bottom:.9rem}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:.9rem}
+.card-header h3{margin:0}
+.pill{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700}
+.pill-blue{background:#dbeafe;color:#1d4ed8}
+.pill-green{background:#d1fae5;color:#065f46}
+.pill-amber{background:#fef3c7;color:#92400e}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.field{display:flex;flex-direction:column;gap:2px}
+.field>label{font-size:11px;color:#555;font-weight:600;line-height:1.3}
+.val-row{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;color:#aaa;margin-bottom:1px}
+.val-row .cur{font-weight:700;color:#111;font-size:13px}
+input[type=range]{width:100%;cursor:pointer;accent-color:#2563eb}
+.rate-wrap{display:flex;align-items:center;gap:4px;margin-top:3px}
+.rate-wrap label{font-size:10px;color:#999;white-space:nowrap}
+input.rbox{width:68px;padding:2px 5px;border:1px solid #ddd;border-radius:5px;font-size:11px;text-align:right;background:#fafafa;color:#111}
+input.rbox:focus{outline:none;border-color:#2563eb;background:#fff}
+.ins-bar{height:12px;border-radius:4px;display:flex;overflow:hidden;margin:6px 0}
 .ins-bar span{height:100%;transition:width .3s}
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;user-select:none;transition:background .15s}
-.tag.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
-.tag-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ins-legend{display:flex;gap:10px;font-size:11px;flex-wrap:wrap}
+.ins-legend span{display:flex;align-items:center;gap:4px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.warn{font-size:11px;color:#dc2626;margin-top:3px;font-weight:500}
+.info-note{font-size:11px;color:#059669;margin-top:3px}
+.divider{border:none;border-top:1px solid #eeede8;margin:.8rem 0}
+.sub-h{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin:.8rem 0 .5rem;padding-bottom:3px;border-bottom:1px solid #f0f0ea}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.9rem}
+.metric-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:.9rem}
+.mc{background:#fff;border:1px solid #e0e0d8;border-radius:8px;padding:.8rem 1rem}
+.mc.dark{background:#111;border-color:#111}
+.mc .ml{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:3px}
+.mc.dark .ml{color:#555}
+.mc .mv{font-size:22px;font-weight:800;color:#111;line-height:1.1}
+.mc.dark .mv{color:#fff}
+.mc .ms{font-size:11px;color:#aaa;margin-top:2px}
 .cpt-table{width:100%;border-collapse:collapse;font-size:12px}
-.cpt-table th{text-align:left;font-weight:500;font-size:11px;color:var(--color-text-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);text-transform:uppercase;letter-spacing:.04em}
-.cpt-table td{padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.cpt-table th{text-align:left;font-weight:700;font-size:10px;color:#888;padding:5px 7px;border-bottom:1px solid #eee;text-transform:uppercase;letter-spacing:.05em}
+.cpt-table td{padding:4px 7px;border-bottom:1px solid #f5f5f2;color:#111}
 .cpt-table tr:last-child td{border-bottom:none}
 .cpt-table .num{text-align:right}
-.total-row{background:var(--color-background-secondary);font-weight:500}
-.warn{font-size:11px;color:var(--color-text-warning);margin-top:4px}
-.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:1rem 0}
-.ins-legend{display:flex;gap:12px;font-size:11px;margin-top:4px}
-.ins-legend span{display:flex;align-items:center;gap:4px}
-.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-select{padding:6px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;width:100%}
-input[type=number]{padding:6px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;width:100%}
-.section-title{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
-.pill{font-size:10px;padding:2px 7px;background:var(--color-background-info);color:var(--color-text-info);border-radius:10px;font-weight:500}
-.cash-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
-.cash-item:last-child{border-bottom:none}
-.cash-item label{font-size:13px}
-.cash-item input{width:80px;text-align:right}
-@media(max-width:600px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.cat-row td{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;background:#f9f9f6;padding:5px 7px 3px}
+.tot-row td{font-weight:700;background:#f4f4f0;padding:6px 7px;font-size:13px}
+.cash-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f2}
+.cash-row:last-child{border-bottom:none}
+.cash-row label{font-size:13px;color:#333}
+.cash-price{display:flex;align-items:center;gap:6px}
+.cash-price span{font-size:11px;color:#aaa}
+input.cash-n{width:60px;padding:3px 5px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:right;background:#fafafa}
+input.cash-n:focus{outline:none;border-color:#2563eb}
+.sched-note{font-size:11px;margin-top:6px;color:#555}
+@media(max-width:900px){.grid6{grid-template-columns:repeat(3,1fr)}.grid5{grid-template-columns:repeat(3,1fr)}.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid4,.grid3{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.metric-grid,.metric-grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid4,.grid5,.grid6,.grid3,.grid2{grid-template-columns:1fr}.metric-grid,.metric-grid3{grid-template-columns:1fr 1fr}}
 </style>
+</head>
+<body>
+<div class="page">
 
-<div style="padding:1rem 0">
-
-<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:1.5rem">
-  <h2 style="margin:0">Ophthalmology revenue estimator</h2>
-  <span style="font-size:12px;color:var(--color-text-tertiary)">Data as of 2025 · Dr. X</span>
+<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:1.2rem">
+  <h2>Ophthalmology revenue estimator</h2>
+  <span style="font-size:12px;color:#aaa">2025 Medicare fee schedule · Dr. X</span>
 </div>
 
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">Practice schedule</h3></div>
+<!-- SCHEDULE -->
+<div class="card">
+  <div class="card-header"><h3>Practice schedule</h3></div>
   <div class="grid3">
     <div class="field">
       <label>Patients per clinic day</label>
-      <div class="val-row"><span>5</span><span id="ppd-val" style="font-weight:500;color:var(--color-text-primary)">25</span><span>60</span></div>
+      <div class="val-row"><span>5</span><span class="cur" id="ppd-val">25</span><span>60</span></div>
       <input type="range" id="ppd" min="5" max="60" value="25" step="1" oninput="upd()">
     </div>
     <div class="field">
       <label>Clinic days per week</label>
-      <div class="val-row"><span>1</span><span id="cpw-val" style="font-weight:500;color:var(--color-text-primary)">4</span><span>5</span></div>
+      <div class="val-row"><span>1</span><span class="cur" id="cpw-val">4</span><span>5</span></div>
       <input type="range" id="cpw" min="1" max="5" value="4" step="1" oninput="upd()">
     </div>
     <div class="field">
       <label>Surgery days per month</label>
-      <div class="val-row"><span>0</span><span id="sdm-val" style="font-weight:500;color:var(--color-text-primary)">4</span><span>16</span></div>
+      <div class="val-row"><span>0</span><span class="cur" id="sdm-val">4</span><span>16</span></div>
       <input type="range" id="sdm" min="0" max="16" value="4" step="1" oninput="upd()">
     </div>
   </div>
-  <p id="sched-note" class="warn" style="margin-top:8px"></p>
+  <p id="sched-note" class="sched-note"></p>
 </div>
 
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">Insurance mix</h3><span class="pill">must total 100%</span></div>
+<!-- INSURANCE MIX -->
+<div class="card">
+  <div class="card-header"><h3>Insurance mix</h3><span class="pill pill-amber">must total 100%</span></div>
   <div class="grid4">
     <div class="field">
       <label>Medicare %</label>
-      <div class="val-row"><span>0</span><span id="mc-val" style="font-weight:500;color:var(--color-text-primary)">35</span><span>100</span></div>
+      <div class="val-row"><span>0</span><span class="cur" id="mc-val">35</span><span>100</span></div>
       <input type="range" id="mc" min="0" max="100" value="35" step="1" oninput="syncIns('mc')">
     </div>
     <div class="field">
       <label>Medicaid %</label>
-      <div class="val-row"><span>0</span><span id="md-val" style="font-weight:500;color:var(--color-text-primary)">30</span><span>100</span></div>
+      <div class="val-row"><span>0</span><span class="cur" id="md-val">30</span><span>100</span></div>
       <input type="range" id="md" min="0" max="100" value="30" step="1" oninput="syncIns('md')">
     </div>
     <div class="field">
       <label>Commercial %</label>
-      <div class="val-row"><span>0</span><span id="com-val" style="font-weight:500;color:var(--color-text-primary)">30</span><span>100</span></div>
+      <div class="val-row"><span>0</span><span class="cur" id="com-val">30</span><span>100</span></div>
       <input type="range" id="com" min="0" max="100" value="30" step="1" oninput="syncIns('com')">
     </div>
     <div class="field">
       <label>Self-pay %</label>
-      <div class="val-row"><span>0</span><span id="sp-val" style="font-weight:500;color:var(--color-text-primary)">5</span><span>100</span></div>
+      <div class="val-row"><span>0</span><span class="cur" id="sp-val">5</span><span>100</span></div>
       <input type="range" id="sp" min="0" max="100" value="5" step="1" oninput="syncIns('sp')">
     </div>
   </div>
@@ -108,456 +137,693 @@ input[type=number]{padding:6px 8px;border:0.5px solid var(--color-border-seconda
     <span><span class="dot" style="background:#D85A30"></span>Commercial</span>
     <span><span class="dot" style="background:#888780"></span>Self-pay</span>
   </div>
-  <p id="ins-warn" class="warn" style="margin-top:6px"></p>
+  <p id="ins-warn" class="warn" style="margin-top:5px"></p>
 
-  <hr class="divider">
-  <div class="grid2">
+  <div class="divider"></div>
+  <div class="grid3">
     <div class="field">
       <label>Medicaid rate vs Medicare (%)</label>
-      <div class="val-row"><span>40%</span><span id="mdr-val" style="font-weight:500;color:var(--color-text-primary)">72%</span><span>120%</span></div>
+      <div class="val-row"><span>40%</span><span class="cur" id="mdr-val">72%</span><span>120%</span></div>
       <input type="range" id="mdr" min="40" max="120" value="72" step="1" oninput="upd()">
-      <span style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px">Your state's Medicaid reimbursement as % of Medicare rate</span>
+      <span style="font-size:10px;color:#aaa;margin-top:2px">Your state's Medicaid vs Medicare rate</span>
     </div>
     <div class="field">
       <label>Commercial rate vs Medicare (%)</label>
-      <div class="val-row"><span>100%</span><span id="comr-val" style="font-weight:500;color:var(--color-text-primary)">130%</span><span>200%</span></div>
+      <div class="val-row"><span>100%</span><span class="cur" id="comr-val">130%</span><span>200%</span></div>
       <input type="range" id="comr" min="100" max="200" value="130" step="1" oninput="upd()">
-      <span style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px">Commercial contracts vs Medicare — typically 110–150%</span>
+      <span style="font-size:10px;color:#aaa;margin-top:2px">Commercial contracts — typically 110–150%</span>
+    </div>
+    <div class="field">
+      <label>Self-pay rate vs Medicare (%)</label>
+      <div class="val-row"><span>5%</span><span class="cur" id="spr-val">50%</span><span>150%</span></div>
+      <input type="range" id="spr" min="5" max="150" value="50" step="1" oninput="upd()">
+      <span style="font-size:10px;color:#aaa;margin-top:2px">Uninsured discount / cash rate</span>
     </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">Patient visit mix</h3></div>
-  <div class="grid3">
+<!-- VISIT MIX -->
+<div class="card">
+  <div class="card-header"><h3>Patient visit mix</h3><span class="pill pill-blue">per clinic day</span></div>
+  <div class="sub-h">E/M visit coding</div>
+  <div class="grid4">
     <div class="field">
-      <label>New patients %</label>
-      <div class="val-row"><span>5%</span><span id="np-val" style="font-weight:500;color:var(--color-text-primary)">22%</span><span>60%</span></div>
-      <input type="range" id="np" min="5" max="60" value="22" step="1" oninput="upd()">
+      <label>New pt — brief (99202)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="npe1-val">0</span><span>30</span></div>
+      <input type="range" id="npe1" min="0" max="30" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99202" type="number" value="93" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
-      <label>Comprehensive exams (of established) %</label>
-      <div class="val-row"><span>10%</span><span id="comp-val" style="font-weight:500;color:var(--color-text-primary)">30%</span><span>80%</span></div>
-      <input type="range" id="comp" min="10" max="80" value="30" step="1" oninput="upd()">
+      <label>New pt — low (99203)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="npe2-val">0</span><span>30</span></div>
+      <input type="range" id="npe2" min="0" max="30" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99203" type="number" value="133" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
-      <label>Glaucoma/complex visit % (of established) </label>
-      <div class="val-row"><span>0%</span><span id="glauc-val" style="font-weight:500;color:var(--color-text-primary)">15%</span><span>50%</span></div>
-      <input type="range" id="glauc" min="0" max="50" value="15" step="1" oninput="upd()">
+      <label>New pt — moderate (99204)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="npe3-val">0</span><span>30</span></div>
+      <input type="range" id="npe3" min="0" max="30" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99204" type="number" value="172" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>New pt — complex (99205)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="npe4-val">0</span><span>30</span></div>
+      <input type="range" id="npe4" min="0" max="30" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99205" type="number" value="211" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+  <div class="sub-h" style="margin-top:.9rem">Ophthalmic exam codes</div>
+  <div class="grid4">
+    <div class="field">
+      <label>New pt ophtho (92004)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="np92004-val">5</span><span>30</span></div>
+      <input type="range" id="np92004" min="0" max="30" value="5" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92004" type="number" value="162" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. — brief (99212)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est1-val">0</span><span>40</span></div>
+      <input type="range" id="est1" min="0" max="40" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99212" type="number" value="55" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. — low (99213)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est2-val">8</span><span>40</span></div>
+      <input type="range" id="est2" min="0" max="40" value="8" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99213" type="number" value="78" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. — moderate (99214)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est3-val">8</span><span>40</span></div>
+      <input type="range" id="est3" min="0" max="40" value="8" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99214" type="number" value="115" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. — complex (99215)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est4-val">0</span><span>40</span></div>
+      <input type="range" id="est4" min="0" max="40" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-99215" type="number" value="155" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. ophtho comp (92014)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est92014-val">5</span><span>40</span></div>
+      <input type="range" id="est92014" min="0" max="40" value="5" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92014" type="number" value="130" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. ophtho inter (92012)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est92012-val">5</span><span>40</span></div>
+      <input type="range" id="est92012" min="0" max="40" value="5" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92012" type="number" value="93" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Est. ophtho brief (92002)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="est92002-val">0</span><span>40</span></div>
+      <input type="range" id="est92002" min="0" max="40" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92002" type="number" value="92" min="0" oninput="upd()"></div>
     </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">Surgery mix</h3><span class="pill">per surgery day</span></div>
-  <div class="grid2" style="margin-bottom:1rem">
+<!-- IN-CLINIC TESTING -->
+<div class="card">
+  <div class="card-header"><h3>Diagnostic testing</h3><span class="pill pill-blue">per clinic day</span></div>
+
+  <div class="sub-h">Imaging &amp; optic nerve</div>
+  <div class="grid5">
+    <div class="field">
+      <label>OCT optic nerve (92133)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="oct1-val">4</span><span>200</span></div>
+      <input type="range" id="oct1" min="0" max="200" value="4" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92133" type="number" value="45" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>OCT retina (92134)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="oct2-val">4</span><span>200</span></div>
+      <input type="range" id="oct2" min="0" max="200" value="4" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92134" type="number" value="47" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Fundus photo (92250)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="fundus-val">0</span><span>100</span></div>
+      <input type="range" id="fundus" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92250" type="number" value="25" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Ant. segment photo (76514)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="asp-val">2</span><span>100</span></div>
+      <input type="range" id="asp" min="0" max="100" value="2" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-76514" type="number" value="34" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Fluorescein angio (92235)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="fa-val">0</span><span>200</span></div>
+      <input type="range" id="fa" min="0" max="200" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92235" type="number" value="96" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>ICG angiography (92242)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="icg-val">0</span><span>200</span></div>
+      <input type="range" id="icg" min="0" max="200" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92242" type="number" value="90" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>B-scan (76512)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="bscan-val">0</span><span>100</span></div>
+      <input type="range" id="bscan" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-76512" type="number" value="58" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Biometry / IOL (92136)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="bio-val">1</span><span>100</span></div>
+      <input type="range" id="bio" min="0" max="100" value="1" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92136" type="number" value="101" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Corneal topography (92025)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="topo-val">0</span><span>100</span></div>
+      <input type="range" id="topo" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92025" type="number" value="48" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Specular microscopy (92286)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="spec-val">0</span><span>100</span></div>
+      <input type="range" id="spec" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92286" type="number" value="76" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Pachymetry (76514 pachy)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="pachy-val">0</span><span>100</span></div>
+      <input type="range" id="pachy" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-pachy" type="number" value="34" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+
+  <div class="sub-h">Visual function testing</div>
+  <div class="grid5">
+    <div class="field">
+      <label>HVF full (92083)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="vff-val">3</span><span>100</span></div>
+      <input type="range" id="vff" min="0" max="100" value="3" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92083" type="number" value="50" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>HVF intermediate (92082)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="vfi-val">0</span><span>100</span></div>
+      <input type="range" id="vfi" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92082" type="number" value="30" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Gonioscopy (92020)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="gon-val">0</span><span>100</span></div>
+      <input type="range" id="gon" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-92020" type="number" value="44" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+</div>
+
+<!-- IN-CLINIC PROCEDURES -->
+<div class="card">
+  <div class="card-header"><h3>In-clinic procedures</h3><span class="pill pill-green">per clinic day</span></div>
+
+  <div class="sub-h">Injections</div>
+  <div class="grid4">
+    <div class="field">
+      <label>Intravitreal injection (67028)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="ivt-val">0</span><span>200</span></div>
+      <input type="range" id="ivt" min="0" max="200" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67028" type="number" value="119" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Sub-Tenon injection (67515)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="subt-val">0</span><span>200</span></div>
+      <input type="range" id="subt" min="0" max="200" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67515" type="number" value="85" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Chalazion injection (67515 mod)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="chzinj-val">0</span><span>100</span></div>
+      <input type="range" id="chzinj" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-chzinj" type="number" value="75" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+
+  <div class="sub-h">Lasers</div>
+  <div class="grid5">
+    <div class="field">
+      <label>SLT (65855)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="slt-val">0</span><span>50</span></div>
+      <input type="range" id="slt" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-65855" type="number" value="188" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>YAG capsulotomy (66821)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="yag-val">0</span><span>50</span></div>
+      <input type="range" id="yag" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66821" type="number" value="252" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>LPI (66761)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="lpi-val">0</span><span>50</span></div>
+      <input type="range" id="lpi" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66761" type="number" value="195" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>PRP (67228)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="prp-val">0</span><span>50</span></div>
+      <input type="range" id="prp" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67228" type="number" value="302" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Focal retinal laser (67210)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="frl-val">0</span><span>100</span></div>
+      <input type="range" id="frl" min="0" max="100" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67210" type="number" value="224" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+
+  <div class="sub-h">Minor procedures &amp; other</div>
+  <div class="grid5">
+    <div class="field">
+      <label>Punctal plugs (68761)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="plug-val">1</span><span>50</span></div>
+      <input type="range" id="plug" min="0" max="50" value="1" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-68761" type="number" value="183" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Prokera (65778)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="prok-val">0</span><span>50</span></div>
+      <input type="range" id="prok" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-65778" type="number" value="557" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Chalazion drainage (67800)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="chzd-val">0</span><span>50</span></div>
+      <input type="range" id="chzd" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67800" type="number" value="174" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Epilation (67820)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="epil-val">0</span><span>20</span></div>
+      <input type="range" id="epil" min="0" max="20" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-67820" type="number" value="62" min="0" oninput="upd()"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SURGERY MIX -->
+<div class="card">
+  <div class="card-header"><h3>Surgery mix</h3><span class="pill pill-amber">per surgery day</span></div>
+  <div class="grid2" style="margin-bottom:.9rem">
     <div class="field">
       <label>Cases per surgery day</label>
-      <div class="val-row"><span>4</span><span id="cpsd-val" style="font-weight:500;color:var(--color-text-primary)">10</span><span>20</span></div>
-      <input type="range" id="cpsd" min="4" max="20" value="10" step="1" oninput="upd()">
+      <div class="val-row"><span>1</span><span class="cur" id="cpsd-val">10</span><span>100</span></div>
+      <input type="range" id="cpsd" min="1" max="100" value="10" step="1" oninput="upd()">
     </div>
     <div></div>
   </div>
 
-  <h3 style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Cataract surgery</h3>
-  <div class="grid3">
+  <div class="sub-h">Cataract surgery</div>
+  <div class="grid4">
     <div class="field">
       <label>Standard cataract (66984) %</label>
-      <div class="val-row"><span>0%</span><span id="std-val" style="font-weight:500;color:var(--color-text-primary)">55%</span><span>100%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="std-val">55%</span><span>100%</span></div>
       <input type="range" id="std" min="0" max="100" value="55" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66984" type="number" value="463" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
       <label>Complex cataract (66982) %</label>
-      <div class="val-row"><span>0%</span><span id="cplx-val" style="font-weight:500;color:var(--color-text-primary)">15%</span><span>100%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="cplx-val">15%</span><span>100%</span></div>
       <input type="range" id="cplx" min="0" max="100" value="15" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66982" type="number" value="630" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
       <label>Premium cataract (66991) %</label>
-      <div class="val-row"><span>0%</span><span id="prem-val" style="font-weight:500;color:var(--color-text-primary)">10%</span><span>100%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="prem-val">10%</span><span>100%</span></div>
       <input type="range" id="prem" min="0" max="100" value="10" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66991" type="number" value="582" min="0" oninput="upd()"></div>
     </div>
+    <div></div>
   </div>
   <p id="cat-warn" class="warn"></p>
 
-  <hr class="divider">
-  <h3 style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">MIGS (minimally invasive glaucoma surgery)</h3>
-  <div class="grid4">
+  <div class="sub-h">MIGS</div>
+  <div class="grid5">
     <div class="field">
-      <label>Stent-based (66991+) %</label>
-      <div class="val-row"><span>0</span><span id="stent-val" style="font-weight:500;color:var(--color-text-primary)">8%</span><span>50%</span></div>
+      <label>iStent/Hydrus add-on (0191T) %</label>
+      <div class="val-row"><span>0%</span><span class="cur" id="stent-val">8%</span><span>50%</span></div>
       <input type="range" id="stent" min="0" max="50" value="8" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-0191T" type="number" value="350" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
       <label>Goniotomy (65820) %</label>
-      <div class="val-row"><span>0</span><span id="gonio-val" style="font-weight:500;color:var(--color-text-primary)">3%</span><span>30%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="gonio-val">3%</span><span>30%</span></div>
       <input type="range" id="gonio" min="0" max="30" value="3" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-65820" type="number" value="723" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
       <label>Canaloplasty (66174) %</label>
-      <div class="val-row"><span>0</span><span id="canal-val" style="font-weight:500;color:var(--color-text-primary)">2%</span><span>30%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="canal-val">2%</span><span>30%</span></div>
       <input type="range" id="canal" min="0" max="30" value="2" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-66174" type="number" value="540" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
       <label>XEN gel stent (0449T) %</label>
-      <div class="val-row"><span>0</span><span id="xen-val" style="font-weight:500;color:var(--color-text-primary)">2%</span><span>30%</span></div>
+      <div class="val-row"><span>0%</span><span class="cur" id="xen-val">2%</span><span>30%</span></div>
       <input type="range" id="xen" min="0" max="30" value="2" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-0449T" type="number" value="420" min="0" oninput="upd()"></div>
     </div>
   </div>
 
-  <hr class="divider">
-  <h3 style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Other surgery</h3>
-  <div class="grid3">
+  <div class="sub-h">Other surgery (per surgery day — absolute count)</div>
+  <div class="grid5">
     <div class="field">
-      <label>SLT laser (65855) — per surgery day</label>
-      <div class="val-row"><span>0</span><span id="slt2-val" style="font-weight:500;color:var(--color-text-primary)">1</span><span>6</span></div>
-      <input type="range" id="slt2" min="0" max="6" value="1" step="1" oninput="upd()">
+      <label>SLT laser (65855)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="slt2-val">1</span><span>50</span></div>
+      <input type="range" id="slt2" min="0" max="50" value="1" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-slt2" type="number" value="188" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
-      <label>YAG capsulotomy (66821) — per surgery day</label>
-      <div class="val-row"><span>0</span><span id="yag-val" style="font-weight:500;color:var(--color-text-primary)">2</span><span>8</span></div>
-      <input type="range" id="yag" min="0" max="8" value="2" step="1" oninput="upd()">
+      <label>YAG capsulotomy (66821)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="yag2-val">2</span><span>50</span></div>
+      <input type="range" id="yag2" min="0" max="50" value="2" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-yag2" type="number" value="252" min="0" oninput="upd()"></div>
     </div>
     <div class="field">
-      <label>LPI (66761) — per surgery day</label>
-      <div class="val-row"><span>0</span><span id="lpi-val" style="font-weight:500;color:var(--color-text-primary)">0</span><span>4</span></div>
-      <input type="range" id="lpi" min="0" max="4" value="0" step="1" oninput="upd()">
+      <label>LPI (66761)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="lpi2-val">0</span><span>50</span></div>
+      <input type="range" id="lpi2" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-lpi2" type="number" value="195" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>PRP (67228)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="prp2-val">0</span><span>50</span></div>
+      <input type="range" id="prp2" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-prp2" type="number" value="302" min="0" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Focal retinal laser (67210)</label>
+      <div class="val-row"><span>0</span><span class="cur" id="frl2-val">0</span><span>50</span></div>
+      <input type="range" id="frl2" min="0" max="50" value="0" step="1" oninput="upd()">
+      <div class="rate-wrap"><label>Medicare $</label><input class="rbox" id="r-frl2" type="number" value="224" min="0" oninput="upd()"></div>
     </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">In-clinic procedures</h3><span class="pill">per clinic day</span></div>
-  <div class="grid4">
-    <div class="field">
-      <label>OCT (92133/92134) /day</label>
-      <div class="val-row"><span>0</span><span id="oct-val" style="font-weight:500;color:var(--color-text-primary)">8</span><span>30</span></div>
-      <input type="range" id="oct" min="0" max="30" value="8" step="1" oninput="upd()">
-    </div>
-    <div class="field">
-      <label>Visual fields (92083) /day</label>
-      <div class="val-row"><span>0</span><span id="vf-val" style="font-weight:500;color:var(--color-text-primary)">5</span><span>20</span></div>
-      <input type="range" id="vf" min="0" max="20" value="5" step="1" oninput="upd()">
-    </div>
-    <div class="field">
-      <label>Punctal plugs (68761) /day</label>
-      <div class="val-row"><span>0</span><span id="plug-val" style="font-weight:500;color:var(--color-text-primary)">1</span><span>8</span></div>
-      <input type="range" id="plug" min="0" max="8" value="1" step="1" oninput="upd()">
-    </div>
-    <div class="field">
-      <label>Prokera (65778) /day</label>
-      <div class="val-row"><span>0</span><span id="prok-val" style="font-weight:500;color:var(--color-text-primary)">0</span><span>4</span></div>
-      <input type="range" id="prok" min="0" max="4" value="0" step="1" oninput="upd()">
-    </div>
-  </div>
-  <div class="grid3" style="margin-top:12px">
-    <div class="field">
-      <label>Biometry/IOL calc (92136) /clinic day</label>
-      <div class="val-row"><span>0</span><span id="bio-val" style="font-weight:500;color:var(--color-text-primary)">1</span><span>8</span></div>
-      <input type="range" id="bio" min="0" max="8" value="1" step="1" oninput="upd()">
-    </div>
-    <div class="field">
-      <label>Anterior segment photo /day</label>
-      <div class="val-row"><span>0</span><span id="asp-val" style="font-weight:500;color:var(--color-text-primary)">2</span><span>12</span></div>
-      <input type="range" id="asp" min="0" max="12" value="2" step="1" oninput="upd()">
-    </div>
-    <div class="field">
-      <label>Fluorescein angiography /day</label>
-      <div class="val-row"><span>0</span><span id="fa-val" style="font-weight:500;color:var(--color-text-primary)">0</span><span>4</span></div>
-      <input type="range" id="fa" min="0" max="4" value="0" step="1" oninput="upd()">
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title"><h3 style="margin:0">Cash-pay services</h3><span class="pill">self-pay / out-of-pocket</span></div>
+<!-- CASH-PAY -->
+<div class="card">
+  <div class="card-header"><h3>Cash-pay / premium services</h3><span class="pill pill-green">self-pay / out-of-pocket</span></div>
   <div class="grid2">
     <div>
-      <div class="cash-item"><label>Femto laser (per eye)</label><input type="number" id="femto-price after cost" value="1000" min="0" oninput="upd()"><span style="font-size:11px;color:var(--color-text-tertiary);margin-left:6px">$ / eye</span></div>
-      <div class="cash-item"><label>Femto laser eyes per month</label><input type="number" id="femto-n" value="3" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>Vivity IOL (per eye)</label><input type="number" id="vivity-price after cost" value="1800" min="0" oninput="upd()"></div>
-      <div class="cash-item"><label>Vivity eyes per month</label><input type="number" id="vivity-n" value="2" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>PanOptix IOL (per eye)</label><input type="number" id="panoptix-price after cost" value="1800" min="0" oninput="upd()"></div>
-      <div class="cash-item"><label>PanOptix eyes per month</label><input type="number" id="panoptix-n" value="3" min="0" oninput="upd()"></div>
+      <div class="cash-row"><label>Femto laser (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="femto-price" type="number" value="1000" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="femto-n" type="number" value="3" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
+      <div class="cash-row"><label>Vivity IOL (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="vivity-price" type="number" value="1800" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="vivity-n" type="number" value="2" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
+      <div class="cash-row"><label>PanOptix IOL (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="panoptix-price" type="number" value="1800" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="panoptix-n" type="number" value="3" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
+      <div class="cash-row"><label>EnVista / presbyopia IOL (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="envy-price" type="number" value="1800" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="envy-n" type="number" value="1" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
     </div>
     <div>
-      <div class="cash-item"><label>Prem. presbyopia IOL — EnVista/other (per eye)</label><input type="number" id="envy-price after cost" value="1800" min="0" oninput="upd()"></div>
-      <div class="cash-item"><label>Presbyopia IOL eyes per month</label><input type="number" id="envy-n" value="1" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>Toric IOL upgrade (per eye)</label><input type="number" id="toric-price after cost" value="1000" min="0" oninput="upd()"></div>
-      <div class="cash-item"><label>Toric eyes per month</label><input type="number" id="toric-n" value="2" min="0" oninput="upd()"></div>
-      <div class="cash-item" style="margin-top:8px"><label>LASIK/refractive </label><input type="number" id="lk-price" value="0" min="0" oninput="upd()"></div>
-      <div class="cash-item"><label>Refractive cases per month</label><input type="number" id="lk-n" value="0" min="0" oninput="upd()"></div>
+      <div class="cash-row"><label>Toric IOL upgrade (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="toric-price" type="number" value="1000" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="toric-n" type="number" value="2" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
+      <div class="cash-row"><label>LASIK / refractive</label><div class="cash-price"><span>$</span><input class="cash-n" id="lk-price" type="number" value="0" min="0" oninput="upd()"><span>/ case ×</span><input class="cash-n" id="lk-n" type="number" value="0" min="0" oninput="upd()"><span>cases/mo</span></div></div>
     </div>
   </div>
 </div>
 
-<div class="section" style="background:var(--color-background-secondary)">
-  <h2>Monthly revenue estimate</h2>
-  <div class="grid4" style="margin-bottom:1rem">
-    <div class="metric-card">
-      <div class="label">Total monthly collections</div>
-      <div class="value" id="tot-col">—</div>
-      <div class="sub" id="tot-sub">—</div>
+<!-- RESULTS -->
+<div class="card" style="background:#fafaf8">
+  <h2 style="margin-bottom:1rem">Monthly revenue estimate</h2>
+  <div class="metric-grid">
+    <div class="mc dark">
+      <div class="ml">Total monthly</div>
+      <div class="mv" id="tot-col">—</div>
+      <div class="ms" id="tot-sub">—</div>
     </div>
-    <div class="metric-card">
-      <div class="label">Clinic collections</div>
-      <div class="value" id="clinic-col">—</div>
-      <div class="sub" id="clinic-sub">—</div>
+    <div class="mc">
+      <div class="ml">E/M &amp; visits</div>
+      <div class="mv" id="visit-col">—</div>
+      <div class="ms" id="visit-sub">—</div>
     </div>
-    <div class="metric-card">
-      <div class="label">Surgery collections</div>
-      <div class="value" id="surg-col">—</div>
-      <div class="sub" id="surg-sub">—</div>
+    <div class="mc">
+      <div class="ml">Testing &amp; procedures</div>
+      <div class="mv" id="proc-col">—</div>
+      <div class="ms">in-clinic diagnostic &amp; procedures</div>
     </div>
-    <div class="metric-card">
-      <div class="label">Cash-pay revenue</div>
-      <div class="value" id="cash-col">—</div>
-      <div class="sub">not insurance-adjusted</div>
+    <div class="mc">
+      <div class="ml">Surgery</div>
+      <div class="mv" id="surg-col">—</div>
+      <div class="ms" id="surg-sub">—</div>
     </div>
   </div>
-  <div class="grid3" style="margin-bottom:1.5rem">
-    <div class="metric-card">
-      <div class="label">Annual projection</div>
-      <div class="value" id="ann-col">—</div>
-      <div class="sub">12-month estimate</div>
+  <div class="metric-grid3">
+    <div class="mc">
+      <div class="ml">Annual projection</div>
+      <div class="mv" id="ann-col">—</div>
+      <div class="ms">12-month estimate</div>
     </div>
-    <div class="metric-card">
-      <div class="label">Clinic days/month</div>
-      <div class="value" id="clinic-days-v">—</div>
-      <div class="sub">after surgery days subtracted</div>
+    <div class="mc">
+      <div class="ml">Cash-pay revenue</div>
+      <div class="mv" id="cash-col">—</div>
+      <div class="ms">gross, not insurance-adjusted</div>
     </div>
-    <div class="metric-card">
-      <div class="label">Total monthly patients</div>
-      <div class="value" id="tot-pts">—</div>
-      <div class="sub">clinic visits</div>
+    <div class="mc">
+      <div class="ml">Clinic days / month</div>
+      <div class="mv" id="clinic-days-v">—</div>
+      <div class="ms" id="clinic-days-s">—</div>
     </div>
   </div>
 
-  <h3 style="margin-bottom:.75rem">Monthly collections breakdown by CPT</h3>
+  <h3 style="margin-bottom:.6rem;margin-top:.5rem">Collections breakdown by CPT</h3>
   <table class="cpt-table">
     <thead>
       <tr>
-        <th>CPT</th>
-        <th>Description</th>
-        <th>Avg Medicare rate</th>
-        <th class="num">Monthly units</th>
-        <th class="num">Blended rate</th>
-        <th class="num">Est. collections</th>
+        <th>CPT</th><th>Description</th><th>Medicare rate</th><th class="num">Units/mo</th><th class="num">Blended rate</th><th class="num">Est. collections</th>
       </tr>
     </thead>
     <tbody id="cpt-body"></tbody>
   </table>
 
-  <hr class="divider">
-  <h3 style="margin-bottom:.75rem">Cash-pay breakdown</h3>
+  <div class="divider"></div>
+  <h3 style="margin-bottom:.6rem">Cash-pay breakdown</h3>
   <table class="cpt-table">
     <thead>
-      <tr><th>Service</th><th class="num">Monthly units</th><th class="num">Price / unit</th><th class="num">Monthly revenue</th></tr>
+      <tr><th>Service</th><th class="num">Units/mo</th><th class="num">Price/unit</th><th class="num">Monthly revenue</th></tr>
     </thead>
     <tbody id="cash-body"></tbody>
   </table>
 
-  <p style="font-size:11px;color:var(--color-text-tertiary);margin-top:1rem">Estimates based on 2025 Medicare physician fee schedule (national average). Commercial = Medicare × commercial rate multiplier. Medicaid = Medicare × Medicaid rate. Collections include standard adjustments. Cash-pay figures are gross and not insurance-adjusted. This is an estimate only — actual collections vary by payer contract, geography, and documentation.</p>
+  <p style="font-size:11px;color:#aaa;margin-top:1rem;line-height:1.6">Estimates based on 2025 Medicare physician fee schedule (national average). Blended rate = weighted average across payer mix. Commercial = Medicare × commercial multiplier. Medicaid = Medicare × Medicaid multiplier. Self-pay = Medicare × self-pay multiplier. Cash-pay figures are gross and not insurance-adjusted. Actual collections vary by payer contract, geography, and documentation. This tool is for planning purposes only.</p>
 </div>
 
 </div>
 
 <script>
-const MC_RATES = {
-  '99213': 78, '99214': 115, '92014': 130, '92004': 162.45, '92012': 93.10,
-  '92002': 91.80, '92133': 45, '92134': 47, '92083': 50, '68761': 183,
-  '65778': 557, '66984': 463, '66982': 630, '66991': 582,
-  '65820': 723, '66174': 540, '0449T': 420, '66821': 252,
-  '65855': 188, '66761': 195, '92136': 101, '92250': 25, '76514': 34,
-  '92082': 30
-};
-
 const INS = ['mc','md','com','sp'];
-let lastChanged = 'sp';
+
+function sv(id){ return parseFloat(document.getElementById(id)?.value)||0; }
+function ni(id){ return parseInt(document.getElementById(id)?.value)||0; }
+function fmt(n){ return '$'+Math.round(n).toLocaleString(); }
+function fmtk(n){
+  if(n>=1000000) return '$'+(n/1000000).toFixed(2)+'M';
+  if(n>=1000) return '$'+Math.round(n/1000)+'K';
+  return '$'+Math.round(n);
+}
+
+function blended(mc_rate_id_or_val) {
+  const base = typeof mc_rate_id_or_val === 'string' ? sv(mc_rate_id_or_val) : mc_rate_id_or_val;
+  const mc=sv('mc'), md=sv('md'), com=sv('com'), sp=sv('sp');
+  const total = mc+md+com+sp || 100;
+  const mdr=sv('mdr')/100, comr=sv('comr')/100, spr=sv('spr')/100;
+  return base * (mc/total*1 + md/total*mdr + com/total*comr + sp/total*spr);
+}
 
 function syncIns(changed) {
-  lastChanged = changed;
-  let vals = {};
-  INS.forEach(k => vals[k] = parseInt(document.getElementById(k).value));
-  let total = INS.reduce((s,k) => s+vals[k], 0);
-  document.getElementById('ins-warn').textContent = total === 100 ? '' : `Insurance mix totals ${total}% — should be 100%`;
-  INS.forEach(k => {
-    document.getElementById(k+'-val').textContent = vals[k]+'%';
-  });
+  INS.forEach(k => document.getElementById(k+'-val').textContent = sv(k)+'%');
+  const total = INS.reduce((s,k)=>s+sv(k),0);
+  const warn = document.getElementById('ins-warn');
+  warn.textContent = total===100 ? '' : `Insurance mix totals ${total}% — should be 100%`;
   const colors = ['#378ADD','#1D9E75','#D85A30','#888780'];
-  const bar = document.getElementById('ins-bar');
-  bar.querySelectorAll('span').forEach((el,i) => { el.style.width = vals[INS[i]]+'%'; });
+  document.getElementById('ins-bar').querySelectorAll('span').forEach((el,i)=>{
+    el.style.width = sv(INS[i])+'%';
+  });
   upd();
 }
 
-function sv(id){ return parseFloat(document.getElementById(id).value)||0; }
-function ni(id){ return parseInt(document.getElementById(id).value)||0; }
-
-function blended(mcare_rate) {
-  let mc = sv('mc')/100, md = sv('md')/100, com = sv('com')/100, sp_pct = sv('sp')/100;
-  let mdr = sv('mdr')/100, comr = sv('comr')/100;
-  return mcare_rate*(mc*1 + md*mdr + com*comr + sp_pct*0.15);
-}
-
-function fmt(n){ return '$'+Math.round(n).toLocaleString(); }
-function fmtk(n){ 
-  if(n>=1000000) return '$'+(n/1000000).toFixed(2)+'M';
-  if(n>=1000) return '$'+Math.round(n/1000)+'K';
-  return '$'+Math.round(n); 
+function setVal(id, suffix) {
+  const el = document.getElementById(id+'-val');
+  if(el) el.textContent = sv(id)+(suffix||'');
 }
 
 function upd() {
-  INS.forEach(k => document.getElementById(k+'-val').textContent = sv(k)+'%');
-  ['ppd','cpw','sdm','cpsd','np','comp','glauc','mdr','comr','std','cplx','prem','stent','gonio','canal','xen','slt2','yag','lpi','oct','vf','plug','prok','bio','asp','fa'].forEach(id => {
-    const el = document.getElementById(id+'-val');
-    if(el) {
-      const v = sv(id);
-      if(['mdr','comr'].includes(id)) el.textContent = v+'%';
-      else if(['np','comp','glauc','std','cplx','prem','stent','gonio','canal','xen'].includes(id)) el.textContent = v+'%';
-      else el.textContent = v;
-    }
-  });
+  // slider displays
+  ['ppd','cpw','sdm','cpsd'].forEach(id=>setVal(id,''));
+  ['mdr','comr','spr','std','cplx','prem','stent','gonio','canal','xen'].forEach(id=>setVal(id,'%'));
+  const pctIds=['npe1','npe2','npe3','npe4','np92004','est1','est2','est3','est4','est4','est92014','est92012','est92002'];
+  ['npe1','npe2','npe3','npe4','np92004','est1','est2','est3','est4','est92014','est92012','est92002',
+   'oct1','oct2','fundus','asp','fa','icg','bscan','bio','topo','spec','pachy',
+   'vff','vfi','gon','ivt','subt','chzinj','slt','yag','lpi','prp','frl',
+   'plug','prok','chzd','epil','slt2','yag2','lpi2','prp2','frl2'].forEach(id=>setVal(id,''));
+  INS.forEach(k=>document.getElementById(k+'-val').textContent=sv(k)+'%');
 
   const ppd=sv('ppd'), cpw=sv('cpw'), sdm=sv('sdm');
-  const weeksPerMonth = 4.33;
-  const clinicDaysPerWeek = cpw;
-  const totalDaysPerMonth = Math.round(clinicDaysPerWeek * weeksPerMonth);
-  const clinicDaysPerMonth = Math.max(0, totalDaysPerMonth - sdm);
-  document.getElementById('clinic-days-v').textContent = clinicDaysPerMonth;
+  const weeksPerMonth=4.33;
+  const totalDays=Math.round(cpw*weeksPerMonth);
+  const clinicDays=Math.max(0,totalDays-sdm);
+  document.getElementById('clinic-days-v').textContent=clinicDays;
+  document.getElementById('clinic-days-s').textContent=`${clinicDays} clinic + ${sdm} surgery = ${totalDays} total days`;
 
-  const note = sdm > totalDaysPerMonth ? `Warning: ${sdm} surgery days exceeds ${totalDaysPerMonth} total work days. Reduce surgery days.` :
-    `${clinicDaysPerMonth} clinic days + ${sdm} surgery days = ${totalDaysPerMonth} work days/month`;
-  document.getElementById('sched-note').textContent = note;
+  const schedNote=document.getElementById('sched-note');
+  if(sdm>totalDays){
+    schedNote.className='warn';
+    schedNote.textContent=`Warning: ${sdm} surgery days exceeds ${totalDays} total work days/month`;
+  } else {
+    schedNote.className='sched-note';
+    schedNote.textContent=`${clinicDays} clinic days + ${sdm} surgery days = ${totalDays} total work days/month`;
+  }
 
-  const totalPts = Math.round(ppd * clinicDaysPerMonth);
-  document.getElementById('tot-pts').textContent = totalPts.toLocaleString();
+  const cpsd=sv('cpsd');
+  const totalSurgCases=Math.round(cpsd*sdm);
+  const std_p=sv('std')/100, cplx_p=sv('cplx')/100, prem_p=sv('prem')/100;
+  const catTotal=(std_p+cplx_p+prem_p)*100;
+  document.getElementById('cat-warn').textContent=catTotal>100?`Cataract types total ${Math.round(catTotal)}% — exceeds 100%`:'';
+  const safeStd=std_p, safeCplx=cplx_p, safePrem=prem_p;
 
-  const np_pct = sv('np')/100;
-  const newPts = Math.round(totalPts * np_pct);
-  const estPts = totalPts - newPts;
-  const comp_pct = sv('comp')/100;
-  const glauc_pct = sv('glauc')/100;
-  const compExams = Math.round(estPts * comp_pct);
-  const glaucVisits = Math.round(estPts * glauc_pct);
-  const intExams = estPts - compExams - glaucVisits;
+  // Visit rows - per clinic day × clinic days
+  const visitRows = [
+    {cpt:'99202',desc:'New pt — brief',n:Math.round(sv('npe1')*clinicDays),mc:sv('r-99202'),cat:'visit'},
+    {cpt:'99203',desc:'New pt — low complexity',n:Math.round(sv('npe2')*clinicDays),mc:sv('r-99203'),cat:'visit'},
+    {cpt:'99204',desc:'New pt — moderate complexity',n:Math.round(sv('npe3')*clinicDays),mc:sv('r-99204'),cat:'visit'},
+    {cpt:'99205',desc:'New pt — high complexity',n:Math.round(sv('npe4')*clinicDays),mc:sv('r-99205'),cat:'visit'},
+    {cpt:'92004',desc:'New pt ophtho — comprehensive',n:Math.round(sv('np92004')*clinicDays),mc:sv('r-92004'),cat:'visit'},
+    {cpt:'99212',desc:'Est. pt — brief',n:Math.round(sv('est1')*clinicDays),mc:sv('r-99212'),cat:'visit'},
+    {cpt:'99213',desc:'Est. pt — low complexity',n:Math.round(sv('est2')*clinicDays),mc:sv('r-99213'),cat:'visit'},
+    {cpt:'99214',desc:'Est. pt — moderate complexity',n:Math.round(sv('est3')*clinicDays),mc:sv('r-99214'),cat:'visit'},
+    {cpt:'99215',desc:'Est. pt — high complexity',n:Math.round(sv('est4')*clinicDays),mc:sv('r-99215'),cat:'visit'},
+    {cpt:'92014',desc:'Est. ophtho — comprehensive',n:Math.round(sv('est92014')*clinicDays),mc:sv('r-92014'),cat:'visit'},
+    {cpt:'92012',desc:'Est. ophtho — intermediate',n:Math.round(sv('est92012')*clinicDays),mc:sv('r-92012'),cat:'visit'},
+    {cpt:'92002',desc:'Est. ophtho — brief',n:Math.round(sv('est92002')*clinicDays),mc:sv('r-92002'),cat:'visit'},
+  ];
 
-  const cpsd = sv('cpsd');
-  const totalSurgCases = Math.round(cpsd * sdm);
-  const std_pct=sv('std')/100, cplx_pct=sv('cplx')/100, prem_pct=sv('prem')/100;
-  const stent_pct=sv('stent')/100, gonio_pct=sv('gonio')/100, canal_pct=sv('canal')/100, xen_pct=sv('xen')/100;
-  
-  const catWarn = (std_pct+cplx_pct+prem_pct)*100;
-  document.getElementById('cat-warn').textContent = catWarn > 100 ? `Cataract types total ${Math.round(catWarn)}% — exceeds 100%` : '';
+  const testRows = [
+    {cpt:'92133',desc:'OCT — optic nerve',n:Math.round(sv('oct1')*clinicDays),mc:sv('r-92133'),cat:'test'},
+    {cpt:'92134',desc:'OCT — retina',n:Math.round(sv('oct2')*clinicDays),mc:sv('r-92134'),cat:'test'},
+    {cpt:'92250',desc:'Fundus photography',n:Math.round(sv('fundus')*clinicDays),mc:sv('r-92250'),cat:'test'},
+    {cpt:'76514',desc:'Anterior segment photo',n:Math.round(sv('asp')*clinicDays),mc:sv('r-76514'),cat:'test'},
+    {cpt:'92235',desc:'Fluorescein angiography',n:Math.round(sv('fa')*clinicDays),mc:sv('r-92235'),cat:'test'},
+    {cpt:'92242',desc:'ICG angiography',n:Math.round(sv('icg')*clinicDays),mc:sv('r-92242'),cat:'test'},
+    {cpt:'76512',desc:'B-scan ultrasonography',n:Math.round(sv('bscan')*clinicDays),mc:sv('r-76512'),cat:'test'},
+    {cpt:'92136',desc:'Biometry / IOL calc',n:Math.round(sv('bio')*clinicDays),mc:sv('r-92136'),cat:'test'},
+    {cpt:'92025',desc:'Corneal topography',n:Math.round(sv('topo')*clinicDays),mc:sv('r-92025'),cat:'test'},
+    {cpt:'92286',desc:'Specular microscopy',n:Math.round(sv('spec')*clinicDays),mc:sv('r-92286'),cat:'test'},
+    {cpt:'76514p',desc:'Pachymetry',n:Math.round(sv('pachy')*clinicDays),mc:sv('r-pachy'),cat:'test'},
+    {cpt:'92083',desc:'HVF — full threshold',n:Math.round(sv('vff')*clinicDays),mc:sv('r-92083'),cat:'test'},
+    {cpt:'92082',desc:'HVF — intermediate',n:Math.round(sv('vfi')*clinicDays),mc:sv('r-92082'),cat:'test'},
+    {cpt:'92020',desc:'Gonioscopy',n:Math.round(sv('gon')*clinicDays),mc:sv('r-92020'),cat:'test'},
+  ];
 
-  const stdN = Math.round(totalSurgCases * std_pct);
-  const cplxN = Math.round(totalSurgCases * cplx_pct);
-  const premN = Math.round(totalSurgCases * prem_pct);
-  const stentN = Math.round(totalSurgCases * stent_pct);
-  const gonioN = Math.round(totalSurgCases * gonio_pct);
-  const canalN = Math.round(totalSurgCases * canal_pct);
-  const xenN = Math.round(totalSurgCases * xen_pct);
-  const slt2N = Math.round(sv('slt2') * sdm);
-  const yagN = Math.round(sv('yag') * sdm);
-  const lpiN = Math.round(sv('lpi') * sdm);
+  const procRows = [
+    {cpt:'67028',desc:'Intravitreal injection',n:Math.round(sv('ivt')*clinicDays),mc:sv('r-67028'),cat:'proc'},
+    {cpt:'67515',desc:'Sub-Tenon injection',n:Math.round(sv('subt')*clinicDays),mc:sv('r-67515'),cat:'proc'},
+    {cpt:'67515c',desc:'Chalazion injection',n:Math.round(sv('chzinj')*clinicDays),mc:sv('r-chzinj'),cat:'proc'},
+    {cpt:'65855',desc:'SLT laser (clinic)',n:Math.round(sv('slt')*clinicDays),mc:sv('r-65855'),cat:'proc'},
+    {cpt:'66821c',desc:'YAG capsulotomy (clinic)',n:Math.round(sv('yag')*clinicDays),mc:sv('r-66821'),cat:'proc'},
+    {cpt:'66761c',desc:'LPI (clinic)',n:Math.round(sv('lpi')*clinicDays),mc:sv('r-66761'),cat:'proc'},
+    {cpt:'67228c',desc:'PRP (clinic)',n:Math.round(sv('prp')*clinicDays),mc:sv('r-67228'),cat:'proc'},
+    {cpt:'67210c',desc:'Focal retinal laser (clinic)',n:Math.round(sv('frl')*clinicDays),mc:sv('r-67210'),cat:'proc'},
+    {cpt:'68761',desc:'Punctal plugs',n:Math.round(sv('plug')*clinicDays),mc:sv('r-68761'),cat:'proc'},
+    {cpt:'65778',desc:'Prokera amniotic membrane',n:Math.round(sv('prok')*clinicDays),mc:sv('r-65778'),cat:'proc'},
+    {cpt:'67800',desc:'Chalazion drainage',n:Math.round(sv('chzd')*clinicDays),mc:sv('r-67800'),cat:'proc'},
+    {cpt:'67820',desc:'Epilation',n:Math.round(sv('epil')*clinicDays),mc:sv('r-67820'),cat:'proc'},
+  ];
 
-  const octN = Math.round(sv('oct') * clinicDaysPerMonth);
-  const vfN = Math.round(sv('vf') * clinicDaysPerMonth);
-  const plugN = Math.round(sv('plug') * clinicDaysPerMonth);
-  const prokN = Math.round(sv('prok') * clinicDaysPerMonth);
-  const bioN = Math.round(sv('bio') * clinicDaysPerMonth);
-  const aspN = Math.round(sv('asp') * clinicDaysPerMonth);
-  const faN = Math.round(sv('fa') * clinicDaysPerMonth);
+  const surgRows = [
+    {cpt:'66984',desc:'Standard cataract (phaco)',n:Math.round(totalSurgCases*safeStd),mc:sv('r-66984'),cat:'sx'},
+    {cpt:'66982',desc:'Complex cataract',n:Math.round(totalSurgCases*safeCplx),mc:sv('r-66982'),cat:'sx'},
+    {cpt:'66991',desc:'Premium cataract (toric/EDOF)',n:Math.round(totalSurgCases*safePrem),mc:sv('r-66991'),cat:'sx'},
+    {cpt:'0191T',desc:'MIGS — iStent/Hydrus add-on',n:Math.round(totalSurgCases*sv('stent')/100),mc:sv('r-0191T'),cat:'sx'},
+    {cpt:'65820',desc:'MIGS — goniotomy',n:Math.round(totalSurgCases*sv('gonio')/100),mc:sv('r-65820'),cat:'sx'},
+    {cpt:'66174',desc:'MIGS — canaloplasty',n:Math.round(totalSurgCases*sv('canal')/100),mc:sv('r-66174'),cat:'sx'},
+    {cpt:'0449T',desc:'MIGS — XEN gel stent',n:Math.round(totalSurgCases*sv('xen')/100),mc:sv('r-0449T'),cat:'sx'},
+    {cpt:'65855s',desc:'SLT laser (OR)',n:Math.round(sv('slt2')*sdm),mc:sv('r-slt2'),cat:'sx'},
+    {cpt:'66821s',desc:'YAG capsulotomy (OR)',n:Math.round(sv('yag2')*sdm),mc:sv('r-yag2'),cat:'sx'},
+    {cpt:'66761s',desc:'LPI (OR)',n:Math.round(sv('lpi2')*sdm),mc:sv('r-lpi2'),cat:'sx'},
+    {cpt:'67228s',desc:'PRP (OR)',n:Math.round(sv('prp2')*sdm),mc:sv('r-prp2'),cat:'sx'},
+    {cpt:'67210s',desc:'Focal retinal laser (OR)',n:Math.round(sv('frl2')*sdm),mc:sv('r-frl2'),cat:'sx'},
+  ];
 
-  const rows = [
-    {cpt:'92002', desc:'New pt exam — comprehensive', n:newPts, mc:MC_RATES['92002'], cat:'clinic'},
-    {cpt:'92014', desc:'Established — comprehensive exam', n:compExams, mc:MC_RATES['92014'], cat:'clinic'},
-    {cpt:'99213', desc:'Established — intermediate visit', n:intExams, mc:MC_RATES['99213'], cat:'clinic'},
-    {cpt:'99214', desc:'Established — complex visit (glaucoma/HM)', n:glaucVisits, mc:MC_RATES['99214'], cat:'clinic'},
-    {cpt:'92133', desc:'OCT — optic nerve', n:Math.round(octN*0.5), mc:MC_RATES['92133'], cat:'proc'},
-    {cpt:'92134', desc:'OCT — retina', n:Math.round(octN*0.5), mc:MC_RATES['92134'], cat:'proc'},
-    {cpt:'92083', desc:'Visual fields', n:vfN, mc:MC_RATES['92083'], cat:'proc'},
-    {cpt:'68761', desc:'Punctal plugs', n:plugN, mc:MC_RATES['68761'], cat:'proc'},
-    {cpt:'65778', desc:'Prokera amniotic membrane', n:prokN, mc:MC_RATES['65778'], cat:'proc'},
-    {cpt:'92136', desc:'Biometry / IOL calc', n:bioN, mc:MC_RATES['92136'], cat:'proc'},
-    {cpt:'92250', desc:'Anterior segment photo', n:aspN, mc:MC_RATES['92250'], cat:'proc'},
-    {cpt:'92082', desc:'Fluorescein angiography', n:faN, mc:MC_RATES['92082'], cat:'proc'},
-    {cpt:'66984', desc:'Standard cataract (phaco)', n:stdN, mc:MC_RATES['66984'], cat:'sx'},
-    {cpt:'66982', desc:'Complex cataract', n:cplxN, mc:MC_RATES['66982'], cat:'sx'},
-    {cpt:'66991', desc:'Premium cataract (toric/EDOF base)', n:premN, mc:MC_RATES['66991'], cat:'sx'},
-    {cpt:'65820', desc:'MIGS — goniotomy', n:gonioN, mc:MC_RATES['65820'], cat:'sx'},
-    {cpt:'66174', desc:'MIGS — canaloplasty', n:canalN, mc:MC_RATES['66174'], cat:'sx'},
-    {cpt:'0449T', desc:'MIGS — XEN gel stent', n:xenN, mc:MC_RATES['0449T'], cat:'sx'},
-    {cpt:'stent', desc:'MIGS — stent-based (iStent/Hydrus add-on)', n:stentN, mc:350, cat:'sx'},
-    {cpt:'65855', desc:'SLT laser', n:slt2N, mc:MC_RATES['65855'], cat:'sx'},
-    {cpt:'66821', desc:'YAG capsulotomy', n:yagN, mc:MC_RATES['66821'], cat:'sx'},
-    {cpt:'66761', desc:'LPI', n:lpiN, mc:MC_RATES['66761'], cat:'sx'},
-  ].filter(r=>r.n>0);
+  const allRows = [...visitRows,...testRows,...procRows,...surgRows].filter(r=>r.n>0);
 
-  let clinicTotal=0, surgTotal=0;
-  const tbody = document.getElementById('cpt-body');
-  tbody.innerHTML = '';
+  let visitTotal=0, testProcTotal=0, surgTotal=0;
+  const tbody=document.getElementById('cpt-body');
+  tbody.innerHTML='';
 
-  let catMap = {'clinic':'Clinic visits','proc':'In-clinic procedures','sx':'Surgery'};
-  let lastCat = null;
+  const catLabels={visit:'E/M visits',test:'Diagnostic testing',proc:'In-clinic procedures',sx:'Surgery'};
+  let lastCat=null;
 
-  rows.forEach(r => {
-    if(r.cat !== lastCat) {
-      lastCat = r.cat;
-      const hdr = document.createElement('tr');
-      hdr.innerHTML = `<td colspan="6" style="padding:8px 8px 4px;font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;background:var(--color-background-tertiary)">${catMap[r.cat]}</td>`;
+  allRows.forEach(r=>{
+    if(r.cat!==lastCat){
+      lastCat=r.cat;
+      const hdr=document.createElement('tr');
+      hdr.className='cat-row';
+      hdr.innerHTML=`<td colspan="6">${catLabels[r.cat]}</td>`;
       tbody.appendChild(hdr);
     }
-    const bl = blended(r.mc);
-    const rev = r.n * bl;
-    if(r.cat==='clinic'||r.cat==='proc') clinicTotal+=rev; else surgTotal+=rev;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="color:var(--color-text-secondary);font-family:var(--font-mono);font-size:11px">${r.cpt}</td><td>${r.desc}</td><td class="num">${fmt(r.mc)}</td><td class="num">${r.n.toLocaleString()}</td><td class="num">${fmt(bl)}</td><td class="num" style="font-weight:500">${fmtk(rev)}</td>`;
+    const bl=blended(r.mc);
+    const rev=Math.max(0,r.n*bl);
+    if(r.cat==='visit') visitTotal+=rev;
+    else if(r.cat==='test'||r.cat==='proc') testProcTotal+=rev;
+    else surgTotal+=rev;
+    const tr=document.createElement('tr');
+    const displayCpt=r.cpt.replace(/[csp0-9]*$/,m=>/^\d/.test(m)?m:'').replace(/[cs]$/,'');
+    tr.innerHTML=`<td style="font-family:monospace;font-size:11px;color:#888">${r.cpt}</td><td>${r.desc}</td><td>${fmt(r.mc)}</td><td class="num">${r.n.toLocaleString()}</td><td class="num">${fmt(bl)}</td><td class="num" style="font-weight:700">${fmtk(rev)}</td>`;
     tbody.appendChild(tr);
   });
 
-  const totRow = document.createElement('tr');
-  totRow.className = 'total-row';
-  totRow.innerHTML = `<td colspan="5" style="padding:8px;font-weight:500">Insurance-adjusted total</td><td class="num" style="font-weight:500;padding:8px">${fmtk(clinicTotal+surgTotal)}</td>`;
+  const insTotal=visitTotal+testProcTotal+surgTotal;
+  const totRow=document.createElement('tr');
+  totRow.className='tot-row';
+  totRow.innerHTML=`<td colspan="5">Insurance-adjusted total</td><td class="num">${fmtk(insTotal)}</td>`;
   tbody.appendChild(totRow);
 
-  const cashRows = [
-    {desc:'Femto laser', n:ni('femto-n'), price:sv('femto-price')},
-    {desc:'Vivity IOL (premium presbyopia)', n:ni('vivity-n'), price:sv('vivity-price')},
-    {desc:'PanOptix IOL (premium presbyopia)', n:ni('panoptix-n'), price:sv('panoptix-price')},
-    {desc:'EnVista / other presbyopia IOL', n:ni('envy-n'), price:sv('envy-price')},
-    {desc:'Toric IOL upgrade', n:ni('toric-n'), price:sv('toric-price')},
-    {desc:'Refractive/LASIK case', n:ni('lk-n'), price:sv('lk-price')},
+  // Cash-pay
+  const cashItems=[
+    {desc:'Femto laser',n:ni('femto-n'),price:sv('femto-price')},
+    {desc:'Vivity IOL (premium presbyopia)',n:ni('vivity-n'),price:sv('vivity-price')},
+    {desc:'PanOptix IOL (premium presbyopia)',n:ni('panoptix-n'),price:sv('panoptix-price')},
+    {desc:'EnVista / other presbyopia IOL',n:ni('envy-n'),price:sv('envy-price')},
+    {desc:'Toric IOL upgrade',n:ni('toric-n'),price:sv('toric-price')},
+    {desc:'Refractive/LASIK',n:ni('lk-n'),price:sv('lk-price')},
   ].filter(r=>r.n>0&&r.price>0);
 
   let cashTotal=0;
-  const cbody = document.getElementById('cash-body');
+  const cbody=document.getElementById('cash-body');
   cbody.innerHTML='';
-  cashRows.forEach(r=>{
-    const rev = r.n*r.price;
+  cashItems.forEach(r=>{
+    const rev=r.n*r.price;
     cashTotal+=rev;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${r.desc}</td><td class="num">${r.n}</td><td class="num">${fmt(r.price)}</td><td class="num" style="font-weight:500">${fmtk(rev)}</td>`;
+    tr.innerHTML=`<td>${r.desc}</td><td class="num">${r.n}</td><td class="num">${fmt(r.price)}</td><td class="num" style="font-weight:700">${fmtk(rev)}</td>`;
     cbody.appendChild(tr);
   });
-  if(cashRows.length===0){
-    cbody.innerHTML='<tr><td colspan="4" style="color:var(--color-text-tertiary);padding:8px">No cash-pay services configured</td></tr>';
+  if(cashItems.length===0){
+    cbody.innerHTML='<tr><td colspan="4" style="color:#aaa;padding:8px">No cash-pay services configured</td></tr>';
   } else {
     const tr=document.createElement('tr');
-    tr.className='total-row';
-    tr.innerHTML=`<td colspan="3" style="padding:8px;font-weight:500">Cash-pay total</td><td class="num" style="padding:8px;font-weight:500">${fmtk(cashTotal)}</td>`;
+    tr.className='tot-row';
+    tr.innerHTML=`<td colspan="3">Cash-pay total</td><td class="num">${fmtk(cashTotal)}</td>`;
     cbody.appendChild(tr);
   }
 
-  const grandTotal = clinicTotal+surgTotal+cashTotal;
-  const annual = grandTotal*12;
-  document.getElementById('tot-col').textContent = fmtk(grandTotal);
-  document.getElementById('tot-sub').textContent = `${fmtk(clinicTotal+surgTotal)} ins. + ${fmtk(cashTotal)} cash`;
-  document.getElementById('clinic-col').textContent = fmtk(clinicTotal);
-  document.getElementById('clinic-sub').textContent = `${clinicDaysPerMonth} clinic days`;
-  document.getElementById('surg-col').textContent = fmtk(surgTotal);
-  document.getElementById('surg-sub').textContent = `${Math.round(totalSurgCases)} surgical cases`;
-  document.getElementById('cash-col').textContent = fmtk(cashTotal);
-  document.getElementById('ann-col').textContent = fmtk(annual);
+  const grand=insTotal+cashTotal;
+  document.getElementById('tot-col').textContent=fmtk(grand);
+  document.getElementById('tot-sub').textContent=`${fmtk(insTotal)} ins. + ${fmtk(cashTotal)} cash`;
+  document.getElementById('visit-col').textContent=fmtk(visitTotal);
+  document.getElementById('visit-sub').textContent=`${clinicDays} clinic days`;
+  document.getElementById('proc-col').textContent=fmtk(testProcTotal);
+  document.getElementById('surg-col').textContent=fmtk(surgTotal);
+  document.getElementById('surg-sub').textContent=`${totalSurgCases} surgical cases`;
+  document.getElementById('cash-col').textContent=fmtk(cashTotal);
+  document.getElementById('ann-col').textContent=fmtk(grand*12);
 }
 
 upd();
 </script>
+</body>
+</html>
