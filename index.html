@@ -590,7 +590,8 @@ canvas#ins-pie{border-radius:50%}
 
 <!-- CASH-PAY -->
 <div class="card">
-  <div class="card-header"><h3>Cash-pay / premium services</h3><span class="pill pill-green">self-pay / out-of-pocket</span></div>
+  <div class="card-header"><h3>Cash-pay / premium services</h3><span class="pill pill-green">self-pay / out-of-pocket</span>
+    <span style="font-size:10px;color:#aaa;margin-left:4px">Note: cash-pay values are as-entered per month and are not adjusted for days off</span></div>
   <div class="grid2">
     <div>
       <div class="cash-row"><label>Femto laser (per eye)</label><div class="cash-price"><span>$</span><input class="cash-n" id="femto-price" type="number" value="1000" min="0" oninput="upd()"><span>/ eye ×</span><input class="cash-n" id="femto-n" type="number" value="3" min="0" oninput="upd()"><span>eyes/mo</span></div></div>
@@ -696,6 +697,9 @@ canvas#ins-pie{border-radius:50%}
 <script>
 const INS=['mc','md','com','sp'];
 
+// Global revenue shared with cost section (avoids lossy DOM string parsing)
+window._grossRevMonth = 0;
+
 function sv(id){return parseFloat(document.getElementById(id)?.value)||0;}
 function ni(id){return parseInt(document.getElementById(id)?.value)||0;}
 function gs(id){return document.getElementById(id)?.value||'';}
@@ -708,7 +712,9 @@ function fmtk(n){
 
 function blended(base){
   const mc=sv('mc'),md=sv('md'),com=sv('com'),sp=sv('sp');
-  const total=mc+md+com+sp||100;
+  const rawTotal=mc+md+com+sp;
+  // Always normalize to 100 so an incomplete mix doesn't silently distort revenue
+  const total=rawTotal>0?rawTotal:100;
   const mdr=sv('mdr')/100,comr=sv('comr')/100,spr=sv('spr')/100;
   return base*(mc/total*1+md/total*mdr+com/total*comr+sp/total*spr);
 }
@@ -941,9 +947,13 @@ function upd(){
   }
 
   const grand=insTotal+cashTotal;
-  const annual=grand*12;
+  // Apply doff fraction to cash-pay for annual (insurance revenue already doff-adjusted via clinicDaysF)
+  const cashAnnual=cashTotal*(1-doffFraction)*12;
+  const insAnnual=insTotal*12;
+  const annual=insAnnual+cashAnnual;
   const totalMonthlyPts=Math.round(ppd*clinicDaysF);
 
+  window._grossRevMonth = grand; // expose to cost section with full precision
   document.getElementById('tot-col').textContent=fmtk(grand);
   document.getElementById('tot-sub').textContent=`${fmtk(insTotal)} ins. + ${fmtk(cashTotal)} cash`;
   document.getElementById('visit-col').textContent=fmtk(visitTotal);
@@ -955,12 +965,565 @@ function upd(){
   document.getElementById('ann-col').textContent=fmtk(annual);
   document.getElementById('tot-pts').textContent=totalMonthlyPts.toLocaleString();
   document.getElementById('tot-pts-s').textContent=`${ppd} pts × ${clinicDaysDisplay} clinic days`;
+  // Sync cost section whenever revenue changes
+  if(typeof updCost === 'function') setTimeout(updCost, 0);
 }
 
 // Wire up other surgery rows to trigger upd
 document.querySelectorAll('#other-surg-rows input').forEach(el=>el.addEventListener('input',upd));
 
 upd();
+</script>
+
+<!-- ============================================================ -->
+<!--  OPERATIONAL COST ESTIMATOR                                  -->
+<!-- ============================================================ -->
+<style>
+/* ---- Operational cost styles ---- */
+.op-section{margin-top:2rem}
+.op-section-title{font-size:22px;font-weight:800;color:#111;margin-bottom:.3rem}
+.op-section-sub{font-size:13px;color:#777;margin-bottom:1.2rem}
+
+/* Staff card table */
+.staff-table{width:100%;border-collapse:collapse;font-size:12px}
+.staff-table th{text-align:left;font-weight:700;font-size:10px;color:#888;padding:6px 8px;border-bottom:2px solid #eee;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.staff-table td{padding:7px 8px;border-bottom:1px solid #f4f4f0;vertical-align:middle}
+.staff-table .num{text-align:right}
+.staff-rec{font-size:11px;font-weight:700;color:#2563eb;background:#eff6ff;border-radius:5px;padding:2px 7px;white-space:nowrap}
+.staff-warn{font-size:11px;font-weight:700;color:#dc2626;background:#fef2f2;border-radius:5px;padding:2px 7px}
+.staff-ok{font-size:11px;font-weight:700;color:#065f46;background:#d1fae5;border-radius:5px;padding:2px 7px}
+.multiplier-note{font-size:10px;color:#aaa;margin-top:2px;line-height:1.4}
+input.op-n{width:76px;padding:3px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:right;background:#fafafa;color:#111}
+input.op-n:focus{outline:none;border-color:#2563eb;background:#fff}
+input.op-pct{width:60px;padding:3px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:right;background:#fafafa;color:#111}
+input.op-pct:focus{outline:none;border-color:#2563eb}
+
+/* Overhead table */
+.oh-table{width:100%;border-collapse:collapse;font-size:12px}
+.oh-table th{text-align:left;font-weight:700;font-size:10px;color:#888;padding:6px 8px;border-bottom:2px solid #eee;text-transform:uppercase;letter-spacing:.05em}
+.oh-table td{padding:6px 8px;border-bottom:1px solid #f4f4f0;vertical-align:middle}
+.oh-table .num{text-align:right;font-weight:700}
+.oh-note{font-size:10px;color:#aaa;font-style:italic}
+
+/* Cost summary metrics */
+.cost-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:.9rem}
+.cmc{border-radius:8px;padding:.8rem 1rem}
+.cmc-red{background:#fef2f2;border:1px solid #fecaca}
+.cmc-green{background:#f0fdf4;border:1px solid #bbf7d0}
+.cmc-blue{background:#eff6ff;border:1px solid #bfdbfe}
+.cmc-dark{background:#111;border:1px solid #111}
+.cmc .cl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:3px}
+.cmc-red .cl{color:#b91c1c}
+.cmc-green .cl{color:#065f46}
+.cmc-blue .cl{color:#1d4ed8}
+.cmc-dark .cl{color:#555}
+.cmc .cv{font-size:20px;font-weight:800;line-height:1.1}
+.cmc-red .cv{color:#dc2626}
+.cmc-green .cv{color:#16a34a}
+.cmc-blue .cv{color:#2563eb}
+.cmc-dark .cv{color:#fff}
+.cmc .cs{font-size:11px;color:#aaa;margin-top:2px}
+.cmc-red .cs{color:#f87171}
+.cmc-green .cs{color:#4ade80}
+.cmc-blue .cs{color:#93c5fd}
+
+/* Net margin bar */
+.margin-bar-wrap{margin:.8rem 0;background:#f4f4f0;border-radius:8px;overflow:hidden;height:18px;position:relative}
+.margin-bar-fill{height:100%;border-radius:8px;transition:width .4s,background .4s}
+.margin-bar-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:#fff;text-shadow:0 0 4px rgba(0,0,0,.4)}
+
+@media(max-width:900px){.cost-metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.cost-metric-grid{grid-template-columns:1fr 1fr}.staff-table{font-size:11px}}
+</style>
+
+<div class="op-section page" style="padding-top:0">
+
+<div class="op-section-title">Operational cost estimator</div>
+<div class="op-section-sub">Staff recommendations are based on your patient volume from the revenue estimator above. Adjust FTEs, hourly rates, and overhead inputs to model your true cost structure.</div>
+
+<!-- STAFFING -->
+<div class="card">
+  <div class="card-header">
+    <h3>Staffing model</h3>
+    <span class="pill pill-blue">auto-recommended from patient volume</span>
+  </div>
+
+  <div style="font-size:11px;color:#555;margin-bottom:.8rem;line-height:1.6;background:#f9f9f6;border-radius:7px;padding:.6rem .9rem">
+    <strong>Staffing ratios used:</strong> 1 tech per 20 pts/day · 1 tester per 30 pts/day · 1 front desk per 40 pts/day · 1 scribe per 35 pts/day.<br>
+    <strong>True employer cost multiplier</strong> includes FICA (7.65%), FUTA/SUTA (~2%), health insurance (~$600/mo per FTE), workers' comp (~2%), malpractice rider, paid time off (~15%), and overhead burden. Default multiplier is <strong>1.30×</strong> base wages — adjust below.
+  </div>
+
+  <!-- Multiplier row -->
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:1rem;padding:.6rem .9rem;background:#fffbeb;border:1px solid #fde68a;border-radius:7px">
+    <div style="font-size:12px;font-weight:700;color:#78350f">True employer cost multiplier (applied to all staff wages):</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <input class="op-n" id="emp-mult" type="number" value="1.30" min="1.00" max="2.00" step="0.01" oninput="updCost()">
+      <span style="font-size:11px;color:#92400e">× base hourly wage</span>
+    </div>
+    <div style="font-size:11px;color:#a16207;flex:1;min-width:200px">
+      Includes payroll taxes (FICA 7.65%, FUTA/SUTA ~2%), health/dental/vision (~$600/mo), workers' comp (~2%), PTO burden, and HR overhead. Typical range: <strong>1.25×–1.45×</strong>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto">
+  <table class="staff-table">
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Ratio rule</th>
+        <th>Rec. FTEs</th>
+        <th>Actual FTEs</th>
+        <th>Base $/hr</th>
+        <th>True cost/hr</th>
+        <th>Hrs/wk per FTE</th>
+        <th>Monthly cost</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="staff-tbody"></tbody>
+    <tfoot>
+      <tr style="background:#f4f4f0">
+        <td colspan="7" style="font-weight:700;padding:7px 8px;font-size:13px">Total monthly staffing cost</td>
+        <td class="num" style="font-weight:800;font-size:14px;padding:7px 8px" id="staff-total-mo">—</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+
+  <div class="multiplier-note" style="margin-top:.6rem;padding:.5rem .8rem;background:#f9f9f6;border-radius:6px">
+    <strong>True cost/hr</strong> = base $/hr × employer multiplier. Monthly cost = true cost/hr × hrs/wk × 4.33 × actual FTEs. FTEs shown as recommended; override "Actual FTEs" to model your exact headcount.
+  </div>
+</div>
+
+<!-- BILLING -->
+<div class="card">
+  <div class="card-header"><h3>Billing &amp; collections</h3><span class="pill pill-amber">% of gross charges</span></div>
+  <div class="grid3">
+    <div class="field">
+      <label>Billing cost method</label>
+      <div style="margin-top:5px;display:flex;gap:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;color:#333;cursor:pointer">
+          <input type="radio" name="bill-method" value="pct" id="bill-pct-radio" checked onchange="updCost()"> % of collections
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;color:#333;cursor:pointer">
+          <input type="radio" name="bill-method" value="flat" id="bill-flat-radio" onchange="updCost()"> Flat monthly fee
+        </label>
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:#555">%</span>
+        <input class="op-n" id="bill-pct" type="number" value="7" min="0" max="50" step="0.1" oninput="updCost()">
+        <span style="font-size:11px;color:#aaa">of net collections (typical 5–10%)</span>
+      </div>
+      <div style="margin-top:5px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:#555">Flat $</span>
+        <input class="op-n" id="bill-flat" type="number" value="2500" min="0" step="100" oninput="updCost()">
+        <span style="font-size:11px;color:#aaa">/month</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Expected net collection rate (%)</label>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:6px">
+        <input class="op-n" id="collect-rate" type="number" value="95" min="50" max="100" step="0.5" oninput="updCost()">
+        <span style="font-size:11px;color:#aaa">% of billed amount collected</span>
+      </div>
+      <span style="font-size:10px;color:#aaa;margin-top:4px;line-height:1.5">Typical ophthalmology practices collect 90–97% of adjusted charges. Accounts for denials, write-offs, and bad debt.</span>
+    </div>
+    <div class="field">
+      <label>EMR / EHR cost per provider ($/month)</label>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:6px">
+        <input class="op-n" id="emr-per-prov" type="number" value="600" min="0" step="50" oninput="updCost()">
+        <span style="font-size:11px;color:#aaa">/provider/mo</span>
+      </div>
+      <div style="margin-top:5px;display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:#555">Providers:</span>
+        <input class="op-n" id="num-providers" type="number" value="1" min="1" max="20" step="1" oninput="updCost()">
+      </div>
+      <span style="font-size:10px;color:#aaa;margin-top:4px;line-height:1.5">Typical ophthalmology EMR (Modernizing Medicine, Nextech, etc.): $400–$900/provider/mo including support &amp; updates.</span>
+    </div>
+  </div>
+</div>
+
+<!-- FIXED / SEMI-FIXED OVERHEAD -->
+<div class="card">
+  <div class="card-header"><h3>Fixed &amp; semi-fixed overhead</h3><span class="pill pill-green">monthly amounts</span></div>
+  <div style="overflow-x:auto">
+  <table class="oh-table">
+    <thead>
+      <tr><th>Expense</th><th>Monthly ($)</th><th>Notes / Typical range</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Rent / Mortgage</strong></td>
+        <td><input class="op-n" id="oh-rent" type="number" value="8000" min="0" step="100" oninput="updCost()"></td>
+        <td class="oh-note">Ophthalmology office: $6,000–$25,000/mo depending on market &amp; sq ft</td>
+      </tr>
+      <tr>
+        <td><strong>Malpractice insurance</strong></td>
+        <td><input class="op-n" id="oh-malp" type="number" value="1500" min="0" step="50" oninput="updCost()"></td>
+        <td class="oh-note">Ophthalmology: ~$8,000–$25,000/yr per physician → ~$700–$2,100/mo</td>
+      </tr>
+      <tr>
+        <td><strong>Licensing &amp; credentialing fees</strong></td>
+        <td><input class="op-n" id="oh-lic" type="number" value="300" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">State licenses, DEA, board fees, payer credentialing (~$2,000–$5,000/yr)</td>
+      </tr>
+      <tr>
+        <td><strong>Marketing &amp; advertising</strong></td>
+        <td><input class="op-n" id="oh-mkt" type="number" value="1000" min="0" step="100" oninput="updCost()"></td>
+        <td class="oh-note">SEO, Google Ads, social media, print. Typical 2–5% of revenue</td>
+      </tr>
+      <tr>
+        <td><strong>Legal &amp; accounting</strong></td>
+        <td><input class="op-n" id="oh-legal" type="number" value="500" min="0" step="50" oninput="updCost()"></td>
+        <td class="oh-note">Contract review, HIPAA counsel, CPA/bookkeeping retainer</td>
+      </tr>
+      <tr>
+        <td><strong>Equipment maintenance &amp; service contracts</strong></td>
+        <td><input class="op-n" id="oh-equip" type="number" value="1200" min="0" step="100" oninput="updCost()"></td>
+        <td class="oh-note">OCT, slit lamp, lasers, biometers — service contracts typically 8–12% of equipment value/yr</td>
+      </tr>
+      <tr>
+        <td><strong>Utilities (electric, water, internet, phone)</strong></td>
+        <td><input class="op-n" id="oh-util" type="number" value="900" min="0" step="50" oninput="updCost()"></td>
+        <td class="oh-note">Medical office: $600–$2,000/mo depending on size &amp; equipment load</td>
+      </tr>
+      <tr>
+        <td><strong>Workers' compensation insurance</strong></td>
+        <td><input class="op-n" id="oh-wc" type="number" value="400" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">Typically 1–3% of total payroll. Enter monthly amount or estimate from payroll</td>
+      </tr>
+      <tr>
+        <td><strong>Medical supplies &amp; disposables</strong></td>
+        <td><input class="op-n" id="oh-supplies" type="number" value="2000" min="0" step="100" oninput="updCost()"></td>
+        <td class="oh-note">Gloves, drops, lenses, syringes, biohazard disposal. ~$3–$8 per patient visit</td>
+      </tr>
+      <tr>
+        <td><strong>Office supplies &amp; printing</strong></td>
+        <td><input class="op-n" id="oh-office" type="number" value="300" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">Paper, toner, forms, patient education materials</td>
+      </tr>
+      <tr>
+        <td><strong>IT / cybersecurity / HIPAA compliance</strong></td>
+        <td><input class="op-n" id="oh-it" type="number" value="500" min="0" step="50" oninput="updCost()"></td>
+        <td class="oh-note">Managed IT, backup, antivirus, HIPAA BAA vendors, staff training</td>
+      </tr>
+      <tr>
+        <td><strong>Laundry &amp; cleaning services</strong></td>
+        <td><input class="op-n" id="oh-clean" type="number" value="300" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">Medical-grade cleaning, linen, sterilization supplies</td>
+      </tr>
+      <tr>
+        <td><strong>Continuing education &amp; travel (CME)</strong></td>
+        <td><input class="op-n" id="oh-cme" type="number" value="400" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">Conferences, online CME, journal subscriptions (~$3,000–$8,000/yr per physician)</td>
+      </tr>
+      <tr>
+        <td><strong>Answering service / after-hours coverage</strong></td>
+        <td><input class="op-n" id="oh-ans" type="number" value="200" min="0" step="25" oninput="updCost()"></td>
+        <td class="oh-note">24/7 physician answering service, call coverage arrangements</td>
+      </tr>
+      <tr>
+        <td><strong>Other / miscellaneous overhead</strong></td>
+        <td><input class="op-n" id="oh-misc" type="number" value="500" min="0" step="50" oninput="updCost()"></td>
+        <td class="oh-note">Bank fees, merchant processing, postage, subscriptions</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr style="background:#f4f4f0">
+        <td style="font-weight:700;padding:7px 8px;font-size:13px">Total fixed/semi-fixed overhead</td>
+        <td class="num" style="font-weight:800;font-size:14px;padding:7px 8px" id="oh-total">—</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+</div>
+
+<!-- COST SUMMARY -->
+<div class="card" style="background:#fafaf8">
+  <h2 style="margin-bottom:1rem">Monthly cost &amp; profitability summary</h2>
+
+  <div class="cost-metric-grid">
+    <div class="cmc cmc-dark">
+      <div class="cl">Gross revenue (est.)</div>
+      <div class="cv" id="cs-gross">—</div>
+      <div class="cs">before collection adjustments</div>
+    </div>
+    <div class="cmc cmc-blue">
+      <div class="cl">Net collections</div>
+      <div class="cv" id="cs-net">—</div>
+      <div class="cs" id="cs-net-s">at — collection rate</div>
+    </div>
+    <div class="cmc cmc-red">
+      <div class="cl">Total monthly costs</div>
+      <div class="cv" id="cs-costs">—</div>
+      <div class="cs" id="cs-costs-s">staff + billing + overhead</div>
+    </div>
+    <div class="cmc cmc-green">
+      <div class="cl">Estimated net income</div>
+      <div class="cv" id="cs-net-income">—</div>
+      <div class="cs" id="cs-ni-s">before physician comp &amp; taxes</div>
+    </div>
+  </div>
+
+  <div class="cost-metric-grid">
+    <div class="cmc cmc-blue">
+      <div class="cl">Total staffing cost</div>
+      <div class="cv" id="cs-staff">—</div>
+      <div class="cs">true employer cost (with multiplier)</div>
+    </div>
+    <div class="cmc cmc-red">
+      <div class="cl">Billing cost</div>
+      <div class="cv" id="cs-bill">—</div>
+      <div class="cs" id="cs-bill-s">—</div>
+    </div>
+    <div class="cmc cmc-red">
+      <div class="cl">Fixed overhead</div>
+      <div class="cv" id="cs-oh">—</div>
+      <div class="cs">rent, supplies, malpractice, etc.</div>
+    </div>
+    <div class="cmc cmc-blue">
+      <div class="cl">Annual net income est.</div>
+      <div class="cv" id="cs-ann">—</div>
+      <div class="cs">× 12 months</div>
+    </div>
+  </div>
+
+  <!-- Overhead ratio bar -->
+  <div style="margin:.4rem 0 .3rem;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.04em">Overhead ratio (costs ÷ net collections)</div>
+  <div class="margin-bar-wrap">
+    <div class="margin-bar-fill" id="oh-bar" style="width:0%;background:#16a34a"></div>
+    <div class="margin-bar-label" id="oh-bar-label">—</div>
+  </div>
+
+  <!-- Cost breakdown table -->
+  <h3 style="margin:1rem 0 .5rem">Cost breakdown detail</h3>
+  <table class="cpt-table">
+    <thead>
+      <tr><th>Category</th><th>Line item</th><th class="num">Monthly cost</th><th class="num">% of net collections</th></tr>
+    </thead>
+    <tbody id="cost-detail-body"></tbody>
+  </table>
+
+  <p style="font-size:11px;color:#aaa;margin-top:1rem;line-height:1.6">
+    Net income shown is <em>before</em> physician compensation, owner distributions, loan payments, depreciation, and income taxes. Staffing costs use the true employer multiplier entered above. Billing cost uses whichever method is selected (% of collections or flat fee). Collection rate applies to insurance-adjusted gross revenue. This section is for planning purposes only — consult a healthcare accountant for formal financial modeling.
+  </p>
+</div>
+
+</div><!-- end op-section -->
+
+<script>
+// =============================================
+//  OPERATIONAL COST CALCULATOR
+// =============================================
+
+// Staff role definitions
+const STAFF_ROLES = [
+  { id:'tech',    label:'Ophthalmic Technician',  ratio:20, ratioLabel:'1 per 20 pts/day', defaultRate:20, defaultHrs:40 },
+  { id:'tester',  label:'Diagnostic Tester',       ratio:30, ratioLabel:'1 per 30 pts/day', defaultRate:19, defaultHrs:40 },
+  { id:'front',   label:'Front Desk / Receptionist', ratio:40, ratioLabel:'1 per 40 pts/day', defaultRate:17, defaultHrs:40 },
+  { id:'scribe',  label:'Medical Scribe',           ratio:35, ratioLabel:'1 per 35 pts/day', defaultRate:16, defaultHrs:40 },
+];
+
+// Render staff rows on load
+function renderStaffRows() {
+  const tbody = document.getElementById('staff-tbody');
+  tbody.innerHTML = '';
+  STAFF_ROLES.forEach(role => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:600">${role.label}</td>
+      <td style="font-size:11px;color:#888">${role.ratioLabel}</td>
+      <td class="num"><span id="rec-${role.id}" class="staff-rec">—</span></td>
+      <td><input class="op-n" id="fte-${role.id}" type="number" value="1" min="0" max="50" step="0.5" oninput="updCost()"></td>
+      <td><input class="op-n" id="rate-${role.id}" type="number" value="${role.defaultRate}" min="0" max="200" step="0.25" oninput="updCost()"></td>
+      <td class="num"><span id="true-rate-${role.id}" style="font-weight:700;color:#2563eb">—</span></td>
+      <td><input class="op-n" id="hrs-${role.id}" type="number" value="${role.defaultHrs}" min="1" max="60" step="1" oninput="updCost()"></td>
+      <td class="num" style="font-weight:700"><span id="mo-cost-${role.id}">—</span></td>
+      <td><span id="status-${role.id}">—</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function svOp(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function fmtOp(n) { return '$' + Math.round(n).toLocaleString(); }
+function fmtkOp(n) {
+  if(n>=1000000) return '$'+(n/1000000).toFixed(2)+'M';
+  if(n>=1000) return '$'+Math.round(n/1000)+'K';
+  return '$'+Math.round(n);
+}
+
+function updCost() {
+  // Pull patient volume from revenue estimator
+  const ppdEl = document.getElementById('ppd');
+  const ppd = ppdEl ? (parseFloat(ppdEl.value)||25) : 25;
+  const mult = svOp('emp-mult') || 1.30;
+
+  // Staff recommendations & costs
+  let totalStaffCost = 0;
+  STAFF_ROLES.forEach(role => {
+    const recFTE = Math.ceil(ppd / role.ratio);
+    const actualFTE = svOp(`fte-${role.id}`);
+    const baseRate = svOp(`rate-${role.id}`);
+    const hrs = svOp(`hrs-${role.id}`) || 40;
+    const trueRate = baseRate * mult;
+    const moCost = trueRate * hrs * 4.33 * actualFTE;
+    totalStaffCost += moCost;
+
+    const recEl = document.getElementById(`rec-${role.id}`);
+    if(recEl) recEl.textContent = recFTE + ' FTE';
+
+    const trEl = document.getElementById(`true-rate-${role.id}`);
+    if(trEl) trEl.textContent = '$' + trueRate.toFixed(2) + '/hr';
+
+    const mcEl = document.getElementById(`mo-cost-${role.id}`);
+    if(mcEl) mcEl.textContent = fmtkOp(moCost);
+
+    const stEl = document.getElementById(`status-${role.id}`);
+    if(stEl) {
+      if(actualFTE < recFTE) {
+        stEl.innerHTML = `<span class="staff-warn">Under (rec ${recFTE})</span>`;
+      } else if(actualFTE > recFTE + 1) {
+        stEl.innerHTML = `<span class="staff-warn">Over (rec ${recFTE})</span>`;
+      } else {
+        stEl.innerHTML = `<span class="staff-ok">✓ On target</span>`;
+      }
+    }
+  });
+
+  const staffTotalEl = document.getElementById('staff-total-mo');
+  if(staffTotalEl) staffTotalEl.textContent = fmtkOp(totalStaffCost);
+
+  // Billing cost
+  const billMethod = document.querySelector('input[name="bill-method"]:checked')?.value || 'pct';
+  const collectRate = (svOp('collect-rate') || 95) / 100;
+
+  // Get gross revenue from global (set by upd() with full precision — avoids DOM string parsing error)
+  const grossRev = window._grossRevMonth || 0;
+  const netCollections = grossRev * collectRate;
+
+  let billCost = 0;
+  let billDesc = '';
+  if(billMethod === 'pct') {
+    const pct = svOp('bill-pct') / 100;
+    billCost = netCollections * pct;
+    billDesc = `${svOp('bill-pct')}% of net collections`;
+  } else {
+    billCost = svOp('bill-flat');
+    billDesc = 'flat monthly fee';
+  }
+
+  // EMR cost
+  const emrCost = svOp('emr-per-prov') * (svOp('num-providers') || 1);
+
+  // Fixed overhead sum
+  const ohIds = ['oh-rent','oh-malp','oh-lic','oh-mkt','oh-legal','oh-equip',
+                  'oh-util','oh-wc','oh-supplies','oh-office','oh-it','oh-clean','oh-cme','oh-ans','oh-misc'];
+  const ohLabels = {
+    'oh-rent':'Rent / Mortgage','oh-malp':'Malpractice insurance','oh-lic':'Licensing & credentialing',
+    'oh-mkt':'Marketing & advertising','oh-legal':'Legal & accounting','oh-equip':'Equipment maintenance',
+    'oh-util':'Utilities','oh-wc':'Workers\' compensation','oh-supplies':'Medical supplies',
+    'oh-office':'Office supplies','oh-it':'IT / Cybersecurity','oh-clean':'Cleaning services',
+    'oh-cme':'CME & education','oh-ans':'Answering service','oh-misc':'Miscellaneous'
+  };
+  let fixedOH = 0;
+  ohIds.forEach(id => { fixedOH += svOp(id); });
+  fixedOH += emrCost;
+
+  const ohTotalEl = document.getElementById('oh-total');
+  if(ohTotalEl) ohTotalEl.textContent = fmtkOp(fixedOH);
+
+  const totalCosts = totalStaffCost + billCost + fixedOH;
+  const netIncome = netCollections - totalCosts;
+  const ohRatio = netCollections > 0 ? (totalCosts / netCollections) * 100 : 0;
+
+  // Update summary metrics
+  const setTxt = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  setTxt('cs-gross', fmtkOp(grossRev));
+  setTxt('cs-net', fmtkOp(netCollections));
+  setTxt('cs-net-s', `at ${svOp('collect-rate')}% collection rate`);
+  setTxt('cs-costs', fmtkOp(totalCosts));
+  setTxt('cs-costs-s', `staff + billing + overhead`);
+  setTxt('cs-net-income', fmtkOp(netIncome));
+  setTxt('cs-ni-s', netIncome >= 0 ? 'before physician comp & taxes' : '⚠ costs exceed collections');
+  setTxt('cs-staff', fmtkOp(totalStaffCost));
+  setTxt('cs-bill', fmtkOp(billCost));
+  setTxt('cs-bill-s', billDesc);
+  setTxt('cs-oh', fmtkOp(fixedOH));
+  setTxt('cs-ann', fmtkOp(netIncome * 12));
+
+  // Overhead bar
+  const barEl = document.getElementById('oh-bar');
+  const barLabel = document.getElementById('oh-bar-label');
+  const barPct = Math.min(100, ohRatio);
+  if(barEl) {
+    barEl.style.width = barPct + '%';
+    barEl.style.background = ohRatio > 80 ? '#dc2626' : ohRatio > 60 ? '#d97706' : '#16a34a';
+  }
+  if(barLabel) barLabel.textContent = ohRatio.toFixed(1) + '% overhead ratio';
+
+  // Cost detail table
+  const costBody = document.getElementById('cost-detail-body');
+  if(!costBody) return;
+  costBody.innerHTML = '';
+
+  const addCatHeader = (label) => {
+    const tr = document.createElement('tr');
+    tr.className = 'cat-row';
+    tr.innerHTML = `<td colspan="4">${label}</td>`;
+    costBody.appendChild(tr);
+  };
+
+  const addRow = (cat, item, cost) => {
+    if(cost <= 0) return;
+    const pct = netCollections > 0 ? ((cost/netCollections)*100).toFixed(1) : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:#aaa;font-size:11px">${cat}</td><td>${item}</td><td class="num">${fmtOp(cost)}</td><td class="num" style="color:#888">${pct}%</td>`;
+    costBody.appendChild(tr);
+  };
+
+  addCatHeader('Staffing');
+  STAFF_ROLES.forEach(role => {
+    const baseRate = svOp(`rate-${role.id}`);
+    const hrs = svOp(`hrs-${role.id}`) || 40;
+    const actualFTE = svOp(`fte-${role.id}`);
+    const trueRate = baseRate * mult;
+    const moCost = trueRate * hrs * 4.33 * actualFTE;
+    addRow('Staffing', `${role.label} (${actualFTE} FTE × $${trueRate.toFixed(0)}/hr true cost)`, moCost);
+  });
+
+  addCatHeader('Billing & Collections');
+  addRow('Billing', `Billing service cost (${billDesc})`, billCost);
+
+  addCatHeader('Technology');
+  addRow('Technology', `EMR/EHR (${svOp('num-providers')} provider × $${svOp('emr-per-prov')}/mo)`, emrCost);
+
+  addCatHeader('Fixed Overhead');
+  ohIds.forEach(id => { addRow('Overhead', ohLabels[id], svOp(id)); });
+
+  // Total row
+  const totTr = document.createElement('tr');
+  totTr.className = 'tot-row';
+  const totPct = netCollections > 0 ? ((totalCosts/netCollections)*100).toFixed(1) : '—';
+  totTr.innerHTML = `<td colspan="2">Total monthly costs</td><td class="num">${fmtOp(totalCosts)}</td><td class="num">${totPct}%</td>`;
+  costBody.appendChild(totTr);
+
+  // Net income row
+  const niTr = document.createElement('tr');
+  niTr.style.background = netIncome >= 0 ? '#f0fdf4' : '#fef2f2';
+  const niPct = netCollections > 0 ? ((netIncome/netCollections)*100).toFixed(1) : '—';
+  niTr.innerHTML = `<td colspan="2" style="font-weight:700;padding:6px 7px;font-size:13px">Estimated net income (before physician comp &amp; tax)</td><td class="num" style="font-weight:800;font-size:13px;color:${netIncome>=0?'#16a34a':'#dc2626'}">${fmtOp(netIncome)}</td><td class="num" style="color:${netIncome>=0?'#16a34a':'#dc2626'}">${niPct}%</td>`;
+  costBody.appendChild(niTr);
+}
+
+// updCost() is now called automatically at the end of upd(), which fires on every revenue input.
+// The setTimeout(updCost, 100) on load below handles initial render.
+
+renderStaffRows();
+// Give revenue estimator a moment to compute first, then run cost calc
+setTimeout(updCost, 100);
 </script>
 </body>
 </html>
